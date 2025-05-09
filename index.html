@@ -15,7 +15,7 @@
 
       <!-- LOGIN FORM -->
       <div id="login-form">
-        <input type="email" id="login-email" placeholder="Email">
+        <input type="text" id="login-username" placeholder="Username">
         <input type="password" id="login-password" placeholder="Password">
         <button onclick="loginUser()">Login</button>
         <p><a href="#" onclick="showForm('signup')">Don’t have an account? Sign up</a></p>
@@ -24,6 +24,7 @@
 
       <!-- SIGNUP FORM -->
       <div id="signup-form" style="display: none;">
+        <input type="text" id="signup-username" placeholder="Username">
         <input type="email" id="signup-email" placeholder="Email">
         <input type="password" id="signup-password" placeholder="Password">
         <input type="password" id="signup-confirm" placeholder="Confirm Password">
@@ -40,10 +41,11 @@
     </div>
   </div>
 
-  <!-- Firebase Auth Script -->
+  <!-- Firebase Auth + Firestore Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
@@ -56,6 +58,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     window.showForm = function (formType) {
       document.getElementById("login-form").style.display = formType === "login" ? "block" : "none";
@@ -71,30 +74,52 @@
     }
 
     window.registerUser = async function () {
-      const email = document.getElementById("signup-email").value;
+      const username = document.getElementById("signup-username").value.trim();
+      const email = document.getElementById("signup-email").value.trim();
       const password = document.getElementById("signup-password").value;
       const confirm = document.getElementById("signup-confirm").value;
 
+      if (!username || username.length < 3) return alert("Please enter a valid username.");
       if (!email.includes("@") || !email.includes(".")) return alert("Please enter a valid email.");
       if (password !== confirm) return alert("Passwords do not match.");
 
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Check for duplicate usernames
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const usernameTaken = querySnapshot.docs.some(doc => doc.data().username === username);
+        if (usernameTaken) return alert("Username already taken.");
+
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await setDoc(doc(db, "users", user.uid), {
+          username: username,
+          email: user.email,
+          highScore: 0
+        });
+
         alert("Signup successful!");
         showForm("login");
+
       } catch (error) {
         alert(error.message);
       }
     }
 
     window.loginUser = async function () {
-      const email = document.getElementById("login-email").value;
+      const username = document.getElementById("login-username").value.trim();
       const password = document.getElementById("login-password").value;
 
       try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const userDoc = querySnapshot.docs.find(doc => doc.data().username === username);
+        if (!userDoc) return alert("Username not found.");
+
+        const email = userDoc.data().email;
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful!");
-        // redirect to game if needed
+        // Redirect to game page here if needed
+
       } catch (error) {
         alert(error.message);
       }
