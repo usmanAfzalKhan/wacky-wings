@@ -1,0 +1,127 @@
+/* Reset & base layout */
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #3e9cff, #1e1e60);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  /* Wrapper for heading + form */
+  .auth-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  
+  /* Main heading */
+  .welcome-text {
+    font-size: 32px;
+    color: white;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  /* Glassmorphic form box */
+  .auth-section {
+    width: 100%;
+    max-width: 360px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 30px 25px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    color: white;
+  }
+  
+  /* Headings inside the form */
+  .auth-section h2 {
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  /* Input styling */
+  .auth-section input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 15px;
+    border: 1px solid #ffffff66;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    outline: none;
+  }
+  
+  .auth-section input::placeholder {
+    color: #ddd;
+  }
+  
+  /* Buttons */
+  .auth-section button {
+    width: 100%;
+    padding: 10px;
+    background-color: #55aaff;
+    color: white;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    margin-bottom: 10px;
+  }
+  
+  .auth-section button:hover {
+    background-color: #3a8cd0;
+  }
+  
+  /* Links under buttons */
+  .auth-section a {
+    color: #cce5ff;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .auth-section a:hover {
+    text-decoration: underline;
+  }
+  
+  .auth-section p {
+    margin: 6px 0;
+  }
+  
+  /* Mobile optimization */
+  @media (max-width: 480px) {
+    .auth-page {
+      padding-top: 20px;
+    }
+  
+    .welcome-text {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+  
+    .auth-section {
+      max-width: 100%;
+      padding: 25px 15px;
+      border-radius: 16px;
+    }
+  
+    .auth-section input,
+    .auth-section button {
+      font-size: 14px;
+    }
+  
+    .auth-section a {
+      font-size: 13px;
+    }
+  }
+  

@@ -1,7 +1,116 @@
 <!DOCTYPE html>
-<html>
-  <head><title>Wacky Wings</title></head>
-  <body>
-    <h1>Welcome to Wacky Wings 🐤</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wacky Wings - Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <h1 class="welcome-text">Welcome to Wacky Wings 🐤</h1>
+
+    <div class="auth-section" id="auth-container">
+      <h2 id="form-title">Login</h2>
+
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <input type="email" id="login-email" placeholder="Email">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="loginUser()">Login</button>
+        <p><a href="#" onclick="showForm('signup')">Don’t have an account? Sign up</a></p>
+        <p><a href="#" onclick="showForm('forgot')">Forgot password?</a></p>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signup-form" style="display: none;">
+        <input type="email" id="signup-email" placeholder="Email">
+        <input type="password" id="signup-password" placeholder="Password">
+        <input type="password" id="signup-confirm" placeholder="Confirm Password">
+        <button onclick="registerUser()">Sign Up</button>
+        <p><a href="#" onclick="showForm('login')">Already have an account? Login</a></p>
+      </div>
+
+      <!-- FORGOT PASSWORD FORM -->
+      <div id="forgot-form" style="display: none;">
+        <input type="email" id="reset-email" placeholder="Enter your email">
+        <button onclick="resetPassword()">Send Reset Link</button>
+        <p><a href="#" onclick="showForm('login')">Back to login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Auth Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+      authDomain: "wacky-wings.firebaseapp.com",
+      projectId: "wacky-wings",
+      storageBucket: "wacky-wings.firebasestorage.app",
+      messagingSenderId: "86787566584",
+      appId: "1:86787566584:web:a4e421c1259763d061c40d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.showForm = function (formType) {
+      document.getElementById("login-form").style.display = formType === "login" ? "block" : "none";
+      document.getElementById("signup-form").style.display = formType === "signup" ? "block" : "none";
+      document.getElementById("forgot-form").style.display = formType === "forgot" ? "block" : "none";
+
+      const titles = {
+        login: "Login",
+        signup: "Sign Up",
+        forgot: "Reset Password"
+      };
+      document.getElementById("form-title").textContent = titles[formType];
+    }
+
+    window.registerUser = async function () {
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+      const confirm = document.getElementById("signup-confirm").value;
+
+      if (!email.includes("@") || !email.includes(".")) return alert("Please enter a valid email.");
+      if (password !== confirm) return alert("Passwords do not match.");
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("Signup successful!");
+        showForm("login");
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    window.loginUser = async function () {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
+        // redirect to game if needed
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    window.resetPassword = async function () {
+      const email = document.getElementById("reset-email").value;
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Reset link sent to your email.");
+        showForm("login");
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  </script>
+</body>
 </html>
