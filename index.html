@@ -118,6 +118,8 @@
         const email = userDoc.data().email;
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful!");
+        window.location.href = "game.html";
+
         // Redirect to game page here if needed
 
       } catch (error) {

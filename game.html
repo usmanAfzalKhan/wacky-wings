@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wacky Wings - Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #70c5ce;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .navbar {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .dropdown {
+      position: relative;
+      max-width: 100%;
+    }
+
+    #dropdown-toggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.95);
+      border-radius: 14px;
+      padding: 10px 0;
+      min-width: 160px;
+      max-width: 90vw;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      text-align: left;
+      z-index: 2000;
+    }
+
+    .dropdown.open .dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+      display: block;
+      width: 100%;
+      padding: 12px 18px;
+      color: white;
+      background: none;
+      border: none;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      text-decoration: none;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .logo-link img {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logo-link:hover img {
+      transform: scale(1.4);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    #user-info {
+      color: #fff;
+      font-size: 16px;
+      margin-top: 80px;
+      margin-bottom: 10px;
+      padding: 0 16px;
+      max-width: 90vw;
+      word-break: break-word;
+    }
+
+    #gameCanvas {
+      background: #fff;
+      border: 2px solid #000;
+      width: 100vw;
+      max-width: 480px;
+      height: calc(100vh - 180px);
+      max-height: 780px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="dropdown" id="dropdown">
+      <button id="dropdown-toggle">Username ▼</button>
+      <div class="dropdown-menu" id="dropdown-menu">
+        <a href="stats.html">My Stats</a>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <a href="index.html" class="logo-link" style="margin-right: 24px;">
+      <img src="images/logo.png" alt="Wacky Wings Logo" />
+    </a>
+  </header>
+
+  <div id="user-info">Your Score: 0</div>
+  <canvas id="gameCanvas"></canvas>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+      authDomain: "wacky-wings.firebaseapp.com",
+      projectId: "wacky-wings",
+      storageBucket: "wacky-wings.firebasestorage.app",
+      messagingSenderId: "86787566584",
+      appId: "1:86787566584:web:a4e421c1259763d061c40d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const dropdown = document.getElementById("dropdown");
+    const dropdownToggle = document.getElementById("dropdown-toggle");
+    const userInfoDiv = document.getElementById("user-info");
+
+    let currentUsername = "User";
+
+    dropdownToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle("open");
+      dropdownToggle.textContent = isOpen ? `${currentUsername} ▲` : `${currentUsername} ▼`;
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove("open");
+        dropdownToggle.textContent = `${currentUsername} ▼`;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        currentUsername = data.username;
+        dropdownToggle.textContent = `${currentUsername} ▼`;
+      } else {
+        dropdownToggle.textContent = "User ▼";
+      }
+    });
+
+    window.logout = async function () {
+      await signOut(auth);
+      window.location.href = "index.html";
+    };
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function drawCenteredMessage(text) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#333";
+      ctx.font = "20px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    }
+
+    drawCenteredMessage("Game starts here!");
+  </script>
+</body>
+</html>
