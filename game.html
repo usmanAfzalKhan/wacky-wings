@@ -81,9 +81,8 @@
     }
 
     #scoreDisplay {
-      position: absolute;
-      top: 85px;
-      left: 16px;
+      margin-top: 80px;
+      margin-bottom: 10px;
       font-size: 20px;
       font-weight: bold;
       color: black;
@@ -96,7 +95,6 @@
       background: #70c5ce;
       display: block;
       border: 2px solid #000;
-      margin-top: 80px;
     }
   </style>
 </head>
@@ -287,8 +285,9 @@
       if (e.code === "Space") flap();
     });
 
+    window.addEventListener("touchstart", flap); // more responsive on mobile
+
     canvas.addEventListener("click", flap);
-    canvas.addEventListener("touchstart", flap);
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
