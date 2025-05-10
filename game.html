@@ -13,7 +13,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
       text-align: center;
     }
 
@@ -32,188 +31,276 @@
       backdrop-filter: blur(10px);
     }
 
-    .dropdown {
-      position: relative;
-      max-width: 100%;
-    }
-
-    #dropdown-toggle {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px;
-      display: inline-block;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      background-color: rgba(0, 0, 0, 0.95);
-      border-radius: 14px;
-      padding: 10px 0;
-      min-width: 160px;
-      max-width: 90vw;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(12px);
-      text-align: left;
-      z-index: 2000;
-    }
-
-    .dropdown.open .dropdown-menu {
-      display: block;
-    }
-
-    .dropdown-menu a,
-    .dropdown-menu button {
-      display: block;
-      width: 100%;
-      padding: 12px 18px;
-      color: white;
-      background: none;
-      border: none;
-      font-size: 15px;
-      text-align: left;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      text-decoration: none;
-    }
-
-    .dropdown-menu a:hover,
-    .dropdown-menu button:hover {
-      background-color: rgba(255, 255, 255, 0.08);
-    }
-
     .logo-link img {
       height: 40px;
       width: 40px;
       border-radius: 50%;
       object-fit: cover;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .logo-link:hover img {
-      transform: scale(1.4);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    .dropdown {
+      position: relative;
     }
 
-    #user-info {
-      color: #fff;
+    .dropdown-toggle {
+      background: none;
+      border: none;
+      color: white;
       font-size: 16px;
-      margin-top: 80px;
-      margin-bottom: 10px;
-      padding: 0 16px;
-      max-width: 90vw;
-      word-break: break-word;
+      cursor: pointer;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 36px;
+      left: 0;
+      background-color: white;
+      color: black;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      display: none;
+      z-index: 1001;
+      min-width: 120px;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+      display: block;
+      padding: 10px 16px;
+      font-size: 14px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+      background-color: #f0f0f0;
+    }
+
+    #scoreDisplay {
+      position: absolute;
+      top: 85px;
+      left: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      color: black;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 6px 10px;
+      border-radius: 8px;
     }
 
     #gameCanvas {
-      background: #fff;
+      background: #70c5ce;
+      display: block;
       border: 2px solid #000;
-      width: 100vw;
-      max-width: 480px;
-      height: calc(100vh - 180px);
-      max-height: 780px;
-      margin-bottom: 20px;
+      margin-top: 80px;
     }
   </style>
 </head>
 <body>
+
   <header class="navbar">
-    <div class="dropdown" id="dropdown">
-      <button id="dropdown-toggle">Username ▼</button>
-      <div class="dropdown-menu" id="dropdown-menu">
+    <div class="dropdown">
+      <button id="usernameDisplay" class="dropdown-toggle">Loading ▼</button>
+      <div class="dropdown-menu" id="userMenu">
         <a href="stats.html">My Stats</a>
-        <button onclick="logout()">Logout</button>
+        <button onclick="alert('Logout functionality goes here')">Logout</button>
       </div>
     </div>
-    <a href="index.html" class="logo-link" style="margin-right: 24px;">
-      <img src="images/logo.png" alt="Wacky Wings Logo" />
+    <a href="index.html" class="logo-link" style="margin-right: 28px;">
+      <img src="images/logo.png" alt="Logo" />
     </a>
   </header>
 
-  <div id="user-info">Your Score: 0</div>
-  <canvas id="gameCanvas"></canvas>
+  <div id="scoreDisplay">Score: 0</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
       authDomain: "wacky-wings.firebaseapp.com",
       projectId: "wacky-wings",
-      storageBucket: "wacky-wings.firebasestorage.app",
+      storageBucket: "wacky-wings.appspot.com",
       messagingSenderId: "86787566584",
       appId: "1:86787566584:web:a4e421c1259763d061c40d"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getFirestore();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const dropdown = document.getElementById("dropdown");
-    const dropdownToggle = document.getElementById("dropdown-toggle");
-    const userInfoDiv = document.getElementById("user-info");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const userMenu = document.getElementById("userMenu");
 
-    let currentUsername = "User";
-
-    dropdownToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = dropdown.classList.toggle("open");
-      dropdownToggle.textContent = isOpen ? `${currentUsername} ▲` : `${currentUsername} ▼`;
+    usernameDisplay.addEventListener("click", () => {
+      const visible = userMenu.style.display === "block";
+      userMenu.style.display = visible ? "none" : "block";
+      usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, visible ? '▼' : '▲');
     });
 
     document.addEventListener("click", (e) => {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("open");
-        dropdownToggle.textContent = `${currentUsername} ▼`;
+      if (!usernameDisplay.contains(e.target) && !userMenu.contains(e.target)) {
+        userMenu.style.display = "none";
+        if (!usernameDisplay.textContent.endsWith("▼")) {
+          usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, '▼');
+        }
       }
     });
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        currentUsername = data.username;
-        dropdownToggle.textContent = `${currentUsername} ▼`;
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const username = userDoc.exists() ? userDoc.data().username : "User";
+        usernameDisplay.textContent = `${username} ▼`;
       } else {
-        dropdownToggle.textContent = "User ▼";
+        usernameDisplay.textContent = "Guest ▼";
       }
     });
-
-    window.logout = async function () {
-      await signOut(auth);
-      window.location.href = "index.html";
-    };
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    function drawCenteredMessage(text) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#333";
-      ctx.font = "20px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    let score = 0;
+
+    const birdImg = new Image();
+    birdImg.src = "images/bird.png";
+
+    const pipeImg = new Image();
+    pipeImg.src = "images/pipe.png";
+
+    const bird = {
+      width: 40,
+      height: 40,
+      x: 80,
+      y: 200,
+      velocity: 0,
+      gravity: 0.5,
+      jumpStrength: -6,
+      maxVelocity: 10,
+      angle: 0
+    };
+
+    const pipes = [];
+    const pipeWidth = 60;
+    const pipeTileHeight = 60;
+    const pipeGap = 150;
+    const pipeSpeed = 2;
+    const pipeSpacing = 120;
+    let frameCount = 0;
+
+    function createPipe() {
+      const minTopY = 50;
+      const maxTopY = canvas.height - pipeGap - 50;
+      const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
+
+      pipes.push({
+        x: canvas.width,
+        topY,
+        bottomY: topY + pipeGap,
+        passed: false
+      });
     }
 
-    drawCenteredMessage("Game starts here!");
+    function updatePipes() {
+      pipes.forEach(pipe => {
+        pipe.x -= pipeSpeed;
+      });
+
+      if (pipes.length && pipes[0].x + pipeWidth < 0) {
+        pipes.shift();
+      }
+
+      if (frameCount > pipeSpacing && frameCount % pipeSpacing === 0) {
+        createPipe();
+      }
+
+      pipes.forEach(pipe => {
+        if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+          pipe.passed = true;
+          score++;
+          scoreDisplay.textContent = `Score: ${score}`;
+        }
+      });
+    }
+
+    function drawPipes() {
+      pipes.forEach(pipe => {
+        for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
+          ctx.save();
+          ctx.translate(pipe.x, y + pipeTileHeight);
+          ctx.scale(1, -1);
+          ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
+          ctx.restore();
+        }
+
+        for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
+          ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
+        }
+      });
+    }
+
+    function updateBird() {
+      bird.velocity += bird.gravity;
+      bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
+      bird.y += bird.velocity;
+
+      const maxDown = 60 * Math.PI / 180;
+      const maxUp = -30 * Math.PI / 180;
+
+      bird.angle = bird.velocity > 0
+        ? Math.min(bird.angle + 0.04, maxDown)
+        : maxUp;
+
+      if (bird.y + bird.height > canvas.height) {
+        bird.y = canvas.height - bird.height;
+        bird.velocity = 0;
+      }
+
+      if (bird.y < 0) {
+        bird.y = 0;
+        bird.velocity = 0;
+      }
+    }
+
+    function drawBird() {
+      ctx.save();
+      ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
+      ctx.rotate(bird.angle);
+      ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
+      ctx.restore();
+    }
+
+    function flap() {
+      bird.velocity = bird.jumpStrength;
+      bird.angle = -30 * (Math.PI / 180);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") flap();
+    });
+
+    canvas.addEventListener("click", flap);
+    canvas.addEventListener("touchstart", flap);
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      updatePipes();
+      drawPipes();
+      updateBird();
+      drawBird();
+      frameCount++;
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
