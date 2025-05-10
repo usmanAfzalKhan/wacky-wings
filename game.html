@@ -183,7 +183,7 @@
       x: 80,
       y: 200,
       velocity: 0,
-      gravity: 0.5,
+      gravity: isMobile ? 0.3 : 0.5, // reduced gravity for mobile
       jumpStrength: -6,
       maxVelocity: 10,
       angle: 0
