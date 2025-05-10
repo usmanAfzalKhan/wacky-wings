@@ -176,6 +176,7 @@
 
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const pipeSpeed = isMobile ? 1.2 : 2;
+    const pipeSpacing = isMobile ? 160 : 120;
 
     const bird = {
       width: 40,
@@ -183,8 +184,8 @@
       x: 80,
       y: 200,
       velocity: 0,
-      gravity: isMobile ? 0.3 : 0.5, // reduced gravity for mobile
-      jumpStrength: -6,
+      gravity: isMobile ? 0.25 : 0.5,
+      jumpStrength: isMobile ? -4.5 : -6,
       maxVelocity: 10,
       angle: 0
     };
@@ -193,7 +194,6 @@
     const pipeWidth = 60;
     const pipeTileHeight = 60;
     const pipeGap = 150;
-    const pipeSpacing = 120;
     let frameCount = 0;
 
     function createPipe() {
