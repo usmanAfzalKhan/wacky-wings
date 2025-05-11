@@ -17,7 +17,7 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-const pipeSpeed = isMobile ? 2.3 : 3.3; // further slowed down for mobile
+const pipeSpeed = isMobile ? 1.9 : 3.3; // significantly slowed down for mobile
 const pipeSpacing = 90;
 
 const birdImg = new Image();
@@ -50,8 +50,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.27 : 0.5, // further reduced gravity
-  jumpStrength: isMobile ? -4.8 : -6.2, // gentler jump for mobile
+  gravity: isMobile ? 0.22 : 0.5, // further reduced gravity for smoother fall
+  jumpStrength: isMobile ? -4.2 : -6.2, // gentler jump
   maxVelocity: 10,
   angle: 0
 };
