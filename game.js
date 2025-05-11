@@ -7,33 +7,28 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
+let gameStarted = false;
+let soundOn = true;
 
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-const pipeSpeed = isMobile ? 1.0 : 2;
-const pipeSpacing = isMobile ? 200 : 120;
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const pipeSpeed = isMobile ? 1.4 : 2.5;
+const pipeSpacing = isMobile ? 150 : 110;
 
-// Load images
 const birdImg = new Image();
-const pipeImg = new Image();
-const bgImg = new Image();
-
-let imagesLoaded = 0;
-const totalImages = 3;
-
-function onImageLoad() {
-  imagesLoaded++;
-  if (imagesLoaded === totalImages) {
-    gameLoop();
-  }
-}
-
 birdImg.src = "images/bird.png";
+
+const pipeImg = new Image();
 pipeImg.src = "images/pipe.png";
+
+const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-birdImg.onload = onImageLoad;
-pipeImg.onload = onImageLoad;
-bgImg.onload = onImageLoad;
+const flapSound = new Audio("audio/flap.mp3");
+flapSound.volume = 0.4;
+const deadSound = new Audio("audio/dead.mp3");
+deadSound.volume = 0.3;
+const pointSound = new Audio("audio/point.mp3");
+pointSound.volume = 0.4;
 
 const bird = {
   width: 40,
@@ -41,8 +36,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.18 : 0.5,
-  jumpStrength: isMobile ? -3.8 : -6,
+  gravity: isMobile ? 0.2 : 0.5,
+  jumpStrength: isMobile ? -3.5 : -6,
   maxVelocity: 10,
   angle: 0
 };
@@ -50,7 +45,7 @@ const bird = {
 const pipes = [];
 const pipeWidth = 60;
 const pipeTileHeight = 60;
-const pipeGap = 150;
+const pipeGap = 160;
 let frameCount = 0;
 let bgX = 0;
 
@@ -58,33 +53,23 @@ function createPipe() {
   const minTopY = 50;
   const maxTopY = canvas.height - pipeGap - 50;
   const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
-
-  pipes.push({
-    x: canvas.width,
-    topY,
-    bottomY: topY + pipeGap,
-    passed: false
-  });
+  pipes.push({ x: canvas.width, topY, bottomY: topY + pipeGap, passed: false });
 }
 
 function updatePipes() {
-  pipes.forEach(pipe => {
-    pipe.x -= pipeSpeed;
-  });
-
-  if (pipes.length && pipes[0].x + pipeWidth < 0) {
-    pipes.shift();
-  }
-
-  if (frameCount > pipeSpacing && frameCount % pipeSpacing === 0) {
-    createPipe();
-  }
-
+  pipes.forEach(pipe => pipe.x -= pipeSpeed);
+  if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
+  if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
   pipes.forEach(pipe => {
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       pipe.passed = true;
       score++;
       scoreDisplay.textContent = `Score: ${score}`;
+      if (soundOn) {
+        const point = pointSound.cloneNode(true);
+        point.volume = 0.4;
+        point.play();
+      }
     }
   });
 }
@@ -115,22 +100,11 @@ function updateBird() {
   bird.velocity += bird.gravity;
   bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
   bird.y += bird.velocity;
-
   const maxDown = 60 * Math.PI / 180;
   const maxUp = -30 * Math.PI / 180;
-
-  bird.angle = bird.velocity > 0
-    ? Math.min(bird.angle + 0.04, maxDown)
-    : maxUp;
-
-  if (bird.y + bird.height > canvas.height) {
-    bird.y = canvas.height - bird.height;
-    bird.velocity = 0;
-  }
-  if (bird.y < 0) {
-    bird.y = 0;
-    bird.velocity = 0;
-  }
+  bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
+  if (bird.y + bird.height > canvas.height) bird.y = canvas.height - bird.height;
+  if (bird.y < 0) bird.y = 0;
 }
 
 function drawBird() {
@@ -153,6 +127,17 @@ function checkCollision() {
   return bird.y <= 0 || bird.y + bird.height >= canvas.height;
 }
 
+function drawCyberButton(x, y, w, h, label) {
+  ctx.fillStyle = "#00ffff";
+  ctx.strokeStyle = "#ff00ff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, w, h);
+  ctx.font = "bold 14px 'Segoe UI'";
+  ctx.fillStyle = "#000";
+  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
+}
+
 function drawFlatlined() {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -162,35 +147,40 @@ function drawFlatlined() {
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
   ctx.fillText(`Score: ${score}`, canvas.width / 2 - 30, 280);
-
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(140, 310, 120, 40);
-  ctx.strokeStyle = "#000";
-  ctx.strokeRect(140, 310, 120, 40);
-  ctx.fillStyle = "#000";
-  ctx.font = "16px 'Segoe UI'";
-  ctx.fillText("REBOOT", 170, 336);
-
+  drawCyberButton(140, 310, 120, 40, "REBOOT");
+  drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
+  if (soundOn) {
+    const dead = deadSound.cloneNode(true);
+    dead.volume = 0.3;
+    dead.play();
+  }
   allowRestart = true;
 }
 
 function flap() {
-  if (gameOver && allowRestart) {
-    location.reload();
-  } else if (!gameOver) {
+  if (gameOver && allowRestart) restartGame();
+  else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
+    if (soundOn) {
+      const flap = flapSound.cloneNode(true);
+      flap.volume = 0.4;
+      flap.play();
+    }
   }
 }
 
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") flap();
-});
-
-if (isMobile) {
-  window.addEventListener("touchstart", flap);
-} else {
-  canvas.addEventListener("click", flap);
+function restartGame() {
+  score = 0;
+  gameOver = false;
+  allowRestart = false;
+  pipes.length = 0;
+  bird.y = 200;
+  bird.velocity = 0;
+  bird.angle = 0;
+  frameCount = 0;
+  scoreDisplay.textContent = "Score: 0";
+  gameLoop();
 }
 
 function gameLoop() {
@@ -200,15 +190,65 @@ function gameLoop() {
   drawPipes();
   updateBird();
   drawBird();
-
   if (!gameOver && checkCollision()) {
     gameOver = true;
     drawFlatlined();
     return;
   }
-
   if (!gameOver) {
     frameCount++;
     requestAnimationFrame(gameLoop);
   }
 }
+
+function drawStartMenu() {
+  drawBackground();
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font = "16px 'Segoe UI'";
+  const message = isMobile ? "Tap to flap" : "Press spacebar to flap";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(message, canvas.width / 2 - ctx.measureText(message).width / 2, 230);
+  drawCyberButton(140, 250, 120, 40, "START GAME");
+  drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
+}
+
+function handleStartMenuClick(x, y) {
+  if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    gameStarted = true;
+    gameLoop();
+  } else if (x >= canvas.width - 110 && x <= canvas.width - 10 && y >= 10 && y <= 40) {
+    soundOn = !soundOn;
+    if (!gameStarted) drawStartMenu();
+    else if (gameOver) drawFlatlined();
+  }
+}
+
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  if (!gameStarted) handleStartMenuClick(x, y);
+  else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) restartGame();
+  else handleStartMenuClick(x, y);
+});
+
+window.addEventListener("touchstart", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  if (!gameStarted) handleStartMenuClick(x, y);
+  else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) restartGame();
+  else handleStartMenuClick(x, y);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (!gameStarted && e.code === "Space") {
+    gameStarted = true;
+    gameLoop();
+  } else if (e.code === "Space") flap();
+});
+
+bgImg.onload = () => drawStartMenu();
