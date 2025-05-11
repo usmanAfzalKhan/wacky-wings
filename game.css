@@ -1,0 +1,94 @@
+/* game.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #1b066f;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .navbar {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+  }
+  
+  .logo-link img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .dropdown {
+    position: relative;
+  }
+  
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    background-color: white;
+    color: black;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: none;
+    z-index: 1001;
+    min-width: 120px;
+  }
+  
+  .dropdown-menu a,
+  .dropdown-menu button {
+    display: block;
+    padding: 10px 16px;
+    font-size: 14px;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .dropdown-menu a:hover,
+  .dropdown-menu button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  #scoreDisplay {
+    margin-top: 80px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
+  
+  #gameCanvas {
+    background: #70c5ce;
+    display: block;
+    border: 2px solid #000;
+  }
+  
