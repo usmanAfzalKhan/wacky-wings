@@ -155,19 +155,18 @@
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-
     const scoreDisplay = document.getElementById("scoreDisplay");
-    let score = 0;
 
+    let score = 0;
     const birdImg = new Image();
     birdImg.src = "images/bird.png";
 
     const pipeImg = new Image();
     pipeImg.src = "images/pipe.png";
 
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    const pipeSpeed = isMobile ? 1.0 : 2;
-    const pipeSpacing = isMobile ? 200 : 120;
+    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+    const pipeSpeed = isMobile ? 1.1 : 2;
+    const pipeSpacing = isMobile ? 210 : 120;
 
     const bird = {
       width: 40,
@@ -175,8 +174,8 @@
       x: 80,
       y: 200,
       velocity: 0,
-      gravity: isMobile ? 0.18 : 0.5,
-      jumpStrength: isMobile ? -3.8 : -6,
+      gravity: isMobile ? 0.16 : 0.5,
+      jumpStrength: isMobile ? -3.5 : -6,
       maxVelocity: 10,
       angle: 0
     };
@@ -191,7 +190,6 @@
       const minTopY = 50;
       const maxTopY = canvas.height - pipeGap - 50;
       const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
-
       pipes.push({
         x: canvas.width,
         topY,
@@ -201,29 +199,22 @@
     }
 
     function updatePipes() {
-      pipes.forEach(pipe => {
+      for (const pipe of pipes) {
         pipe.x -= pipeSpeed;
-      });
-
-      if (pipes.length && pipes[0].x + pipeWidth < 0) {
-        pipes.shift();
       }
-
-      if (frameCount > pipeSpacing && frameCount % pipeSpacing === 0) {
-        createPipe();
-      }
-
-      pipes.forEach(pipe => {
+      if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
+      if (frameCount > pipeSpacing && frameCount % pipeSpacing === 0) createPipe();
+      for (const pipe of pipes) {
         if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
           pipe.passed = true;
           score++;
           scoreDisplay.textContent = `Score: ${score}`;
         }
-      });
+      }
     }
 
     function drawPipes() {
-      pipes.forEach(pipe => {
+      for (const pipe of pipes) {
         for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
           ctx.save();
           ctx.translate(pipe.x, y + pipeTileHeight);
@@ -231,30 +222,24 @@
           ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
           ctx.restore();
         }
-
         for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
           ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
         }
-      });
+      }
     }
 
     function updateBird() {
       bird.velocity += bird.gravity;
       bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
       bird.y += bird.velocity;
-
       const maxDown = 60 * Math.PI / 180;
       const maxUp = -30 * Math.PI / 180;
-
-      bird.angle = bird.velocity > 0
-        ? Math.min(bird.angle + 0.04, maxDown)
-        : maxUp;
+      bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
 
       if (bird.y + bird.height > canvas.height) {
         bird.y = canvas.height - bird.height;
         bird.velocity = 0;
       }
-
       if (bird.y < 0) {
         bird.y = 0;
         bird.velocity = 0;
@@ -279,7 +264,9 @@
     });
 
     if (isMobile) {
-      window.addEventListener("touchstart", flap);
+      window.addEventListener("touchend", (e) => {
+        flap();
+      }, { passive: true });
     } else {
       canvas.addEventListener("click", flap);
     }
