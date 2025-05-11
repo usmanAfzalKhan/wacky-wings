@@ -10,12 +10,14 @@ let allowRestart = false;
 let gameStarted = false;
 let soundOn = true;
 let audioUnlocked = false;
-let lastFlapTime = 0;
-let suppressNextFlap = false; // NEW: More reliable flag for double flap prevention
+let awaitingFirstFlap = false; // NEW: to block first flap after start
 
-const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const pipeSpeed = isiOS ? 3.4 : isMobile ? 2.8 : 3.3;
+const userAgent = navigator.userAgent || "";
+const isiOS = /iPhone|iPad|iPod/.test(userAgent);
+const isAndroid = /Android/.test(userAgent);
+const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
+
+const pipeSpeed = isMobile ? 3.1 : 3.3;
 const pipeSpacing = 90;
 
 const birdImg = new Image();
@@ -48,8 +50,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isiOS ? 0.33 : isMobile ? 0.3 : 0.5,
-  jumpStrength: isiOS ? -6.2 : isMobile ? -5 : -6,
+  gravity: isMobile ? 0.36 : 0.5,
+  jumpStrength: isMobile ? -5.7 : -6.2,
   maxVelocity: 10,
   angle: 0
 };
@@ -181,15 +183,10 @@ function drawFlatlined() {
 }
 
 function flap() {
-  const now = performance.now();
-  if (suppressNextFlap) {
-    suppressNextFlap = false;
-    lastFlapTime = now;
+  if (!gameStarted || awaitingFirstFlap) {
+    awaitingFirstFlap = false;
     return;
   }
-  if (now - lastFlapTime < 120) return;
-  lastFlapTime = now;
-
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
@@ -249,7 +246,7 @@ function drawStartMenu() {
 function handleStartMenuClick(x, y) {
   if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
     gameStarted = true;
-    suppressNextFlap = true;
+    awaitingFirstFlap = true;
     gameLoop();
   } else if (x >= canvas.width - 110 && x <= canvas.width - 10 && y >= 10 && y <= 40) {
     soundOn = !soundOn;
@@ -283,7 +280,7 @@ document.addEventListener("keydown", (e) => {
   unlockAudio();
   if (!gameStarted && e.code === "Space") {
     gameStarted = true;
-    suppressNextFlap = true;
+    awaitingFirstFlap = true;
     gameLoop();
   } else if (e.code === "Space") flap();
 });
