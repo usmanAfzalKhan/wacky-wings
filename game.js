@@ -10,14 +10,14 @@ let allowRestart = false;
 let gameStarted = false;
 let soundOn = true;
 let audioUnlocked = false;
-let awaitingFirstFlap = false; // NEW: to block first flap after start
+let awaitingFirstFlap = false;
 
 const userAgent = navigator.userAgent || "";
 const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-const pipeSpeed = isMobile ? 3.1 : 3.3;
+const pipeSpeed = isMobile ? 2.7 : 3.3; // slowed down for mobile
 const pipeSpacing = 90;
 
 const birdImg = new Image();
@@ -50,8 +50,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.36 : 0.5,
-  jumpStrength: isMobile ? -5.7 : -6.2,
+  gravity: isMobile ? 0.3 : 0.5, // reduced gravity for smoother rise/fall
+  jumpStrength: isMobile ? -5.2 : -6.2, // reduced jump height for mobile
   maxVelocity: 10,
   angle: 0
 };
