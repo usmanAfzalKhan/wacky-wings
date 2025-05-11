@@ -15,6 +15,7 @@
       align-items: center;
       text-align: center;
     }
+
     .navbar {
       width: 100%;
       background-color: rgba(0, 0, 0, 0.3);
@@ -29,15 +30,18 @@
       z-index: 1000;
       backdrop-filter: blur(10px);
     }
+
     .logo-link img {
       height: 40px;
       width: 40px;
       border-radius: 50%;
       object-fit: cover;
     }
+
     .dropdown {
       position: relative;
     }
+
     .dropdown-toggle {
       background: none;
       border: none;
@@ -45,6 +49,7 @@
       font-size: 16px;
       cursor: pointer;
     }
+
     .dropdown-menu {
       position: absolute;
       top: 36px;
@@ -57,6 +62,7 @@
       z-index: 1001;
       min-width: 120px;
     }
+
     .dropdown-menu a,
     .dropdown-menu button {
       display: block;
@@ -68,10 +74,12 @@
       text-align: left;
       cursor: pointer;
     }
+
     .dropdown-menu a:hover,
     .dropdown-menu button:hover {
       background-color: #f0f0f0;
     }
+
     #scoreDisplay {
       margin-top: 80px;
       margin-bottom: 10px;
@@ -82,10 +90,13 @@
       padding: 6px 10px;
       border-radius: 8px;
     }
+
     #gameCanvas {
+      width: 400px;
+      height: 600px;
+      border: 2px solid #000;
       background: #70c5ce;
       display: block;
-      border: 2px solid #000;
     }
   </style>
 </head>
@@ -105,7 +116,7 @@
   </header>
 
   <div id="scoreDisplay">Score: 0</div>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <canvas id="gameCanvas"></canvas>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -127,6 +138,7 @@
 
     const usernameDisplay = document.getElementById("usernameDisplay");
     const userMenu = document.getElementById("userMenu");
+    const scoreDisplay = document.getElementById("scoreDisplay");
 
     usernameDisplay.addEventListener("click", () => {
       const visible = userMenu.style.display === "block";
@@ -155,18 +167,22 @@
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const scoreDisplay = document.getElementById("scoreDisplay");
 
-    let score = 0;
+    // Retina display scaling
+    const DPR = window.devicePixelRatio || 1;
+    canvas.width = 400 * DPR;
+    canvas.height = 600 * DPR;
+    ctx.scale(DPR, DPR);
+
+    const isMobile = /Mobi|iPhone|Android/i.test(navigator.userAgent);
+    const pipeSpeed = isMobile ? 1.0 : 2;
+    const pipeSpacing = isMobile ? 200 : 120;
+
     const birdImg = new Image();
     birdImg.src = "images/bird.png";
 
     const pipeImg = new Image();
     pipeImg.src = "images/pipe.png";
-
-    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
-    const pipeSpeed = isMobile ? 1.1 : 2;
-    const pipeSpacing = isMobile ? 210 : 120;
 
     const bird = {
       width: 40,
@@ -174,8 +190,8 @@
       x: 80,
       y: 200,
       velocity: 0,
-      gravity: isMobile ? 0.16 : 0.5,
-      jumpStrength: isMobile ? -3.5 : -6,
+      gravity: isMobile ? 0.18 : 0.5,
+      jumpStrength: isMobile ? -3.8 : -6,
       maxVelocity: 10,
       angle: 0
     };
@@ -185,36 +201,34 @@
     const pipeTileHeight = 60;
     const pipeGap = 150;
     let frameCount = 0;
+    let score = 0;
 
     function createPipe() {
       const minTopY = 50;
-      const maxTopY = canvas.height - pipeGap - 50;
+      const maxTopY = 600 - pipeGap - 50;
       const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
-      pipes.push({
-        x: canvas.width,
-        topY,
-        bottomY: topY + pipeGap,
-        passed: false
-      });
+
+      pipes.push({ x: 400, topY, bottomY: topY + pipeGap, passed: false });
     }
 
     function updatePipes() {
-      for (const pipe of pipes) {
-        pipe.x -= pipeSpeed;
-      }
+      pipes.forEach(pipe => { pipe.x -= pipeSpeed; });
+
       if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
+
       if (frameCount > pipeSpacing && frameCount % pipeSpacing === 0) createPipe();
-      for (const pipe of pipes) {
+
+      pipes.forEach(pipe => {
         if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
           pipe.passed = true;
           score++;
           scoreDisplay.textContent = `Score: ${score}`;
         }
-      }
+      });
     }
 
     function drawPipes() {
-      for (const pipe of pipes) {
+      pipes.forEach(pipe => {
         for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
           ctx.save();
           ctx.translate(pipe.x, y + pipeTileHeight);
@@ -222,22 +236,23 @@
           ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
           ctx.restore();
         }
-        for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
+        for (let y = pipe.bottomY; y < 600; y += pipeTileHeight) {
           ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
         }
-      }
+      });
     }
 
     function updateBird() {
       bird.velocity += bird.gravity;
       bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
       bird.y += bird.velocity;
+
       const maxDown = 60 * Math.PI / 180;
       const maxUp = -30 * Math.PI / 180;
       bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
 
-      if (bird.y + bird.height > canvas.height) {
-        bird.y = canvas.height - bird.height;
+      if (bird.y + bird.height > 600) {
+        bird.y = 600 - bird.height;
         bird.velocity = 0;
       }
       if (bird.y < 0) {
@@ -259,20 +274,18 @@
       bird.angle = -30 * (Math.PI / 180);
     }
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", e => {
       if (e.code === "Space") flap();
     });
 
     if (isMobile) {
-      window.addEventListener("touchend", (e) => {
-        flap();
-      }, { passive: true });
+      window.addEventListener("touchend", flap, { passive: true });
     } else {
       canvas.addEventListener("click", flap);
     }
 
     function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, 400, 600);
       updatePipes();
       drawPipes();
       updateBird();
