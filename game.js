@@ -9,10 +9,12 @@ let gameOver = false;
 let allowRestart = false;
 let gameStarted = false;
 let soundOn = true;
+let audioUnlocked = false;
 
+const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const pipeSpeed = isMobile ? 1.4 : 2.5;
-const pipeSpacing = isMobile ? 150 : 110;
+const pipeSpeed = isiOS ? 3.1 : isMobile ? 1.4 : 2.5;
+const pipeSpacing = 100; // Slightly increased spacing for all devices
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -24,11 +26,19 @@ const bgImg = new Image();
 bgImg.src = "images/background.png";
 
 const flapSound = new Audio("audio/flap.mp3");
-flapSound.volume = 0.4;
+flapSound.volume = 0.35;
+flapSound.playsInline = true;
+flapSound.crossOrigin = "anonymous";
+
 const deadSound = new Audio("audio/dead.mp3");
-deadSound.volume = 0.3;
+deadSound.volume = 0.25;
+deadSound.playsInline = true;
+deadSound.crossOrigin = "anonymous";
+
 const pointSound = new Audio("audio/point.mp3");
-pointSound.volume = 0.4;
+pointSound.volume = 0.35;
+pointSound.playsInline = true;
+pointSound.crossOrigin = "anonymous";
 
 const bird = {
   width: 40,
@@ -36,8 +46,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.2 : 0.5,
-  jumpStrength: isMobile ? -3.5 : -6,
+  gravity: isiOS ? 0.4 : isMobile ? 0.2 : 0.5,
+  jumpStrength: isiOS ? -5 : isMobile ? -3.5 : -6,
   maxVelocity: 10,
   angle: 0
 };
@@ -45,9 +55,20 @@ const bird = {
 const pipes = [];
 const pipeWidth = 60;
 const pipeTileHeight = 60;
-const pipeGap = 160;
+const pipeGap = 165;
 let frameCount = 0;
 let bgX = 0;
+
+function unlockAudio() {
+  if (!audioUnlocked) {
+    [flapSound, deadSound, pointSound].forEach(sound => {
+      try {
+        sound.play().then(() => sound.pause());
+      } catch (_) {}
+    });
+    audioUnlocked = true;
+  }
+}
 
 function createPipe() {
   const minTopY = 50;
@@ -67,7 +88,7 @@ function updatePipes() {
       scoreDisplay.textContent = `Score: ${score}`;
       if (soundOn) {
         const point = pointSound.cloneNode(true);
-        point.volume = 0.4;
+        point.volume = 0.35;
         point.play();
       }
     }
@@ -151,7 +172,7 @@ function drawFlatlined() {
   drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
   if (soundOn) {
     const dead = deadSound.cloneNode(true);
-    dead.volume = 0.3;
+    dead.volume = 0.25;
     dead.play();
   }
   allowRestart = true;
@@ -164,7 +185,7 @@ function flap() {
     bird.angle = -30 * (Math.PI / 180);
     if (soundOn) {
       const flap = flapSound.cloneNode(true);
-      flap.volume = 0.4;
+      flap.volume = 0.35;
       flap.play();
     }
   }
@@ -226,6 +247,7 @@ function handleStartMenuClick(x, y) {
 }
 
 canvas.addEventListener("click", (e) => {
+  unlockAudio();
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
@@ -235,6 +257,7 @@ canvas.addEventListener("click", (e) => {
 });
 
 window.addEventListener("touchstart", (e) => {
+  unlockAudio();
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
   const x = touch.clientX - rect.left;
@@ -245,6 +268,7 @@ window.addEventListener("touchstart", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
+  unlockAudio();
   if (!gameStarted && e.code === "Space") {
     gameStarted = true;
     gameLoop();

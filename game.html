@@ -32,11 +32,23 @@
     }
 
     .logo-link img {
-      height: 40px;
-      width: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover: Slightly enlarge the image */
+.logo-link img:hover {
+  transform: scale(1.2);
+}
+
+/* Active (on click): Show a neon ring around it */
+.logo-link img:active {
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+}
+
 
     .dropdown {
       position: relative;
@@ -44,23 +56,32 @@
 
     .dropdown-toggle {
       background: none;
-      border: none;
-      color: white;
+      border: 2px solid #00ffff;
+      color: #00ffff;
       font-size: 16px;
+      padding: 6px 12px;
+      border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .dropdown-toggle:hover {
+      background-color: rgba(0, 255, 255, 0.2);
     }
 
     .dropdown-menu {
       position: absolute;
-      top: 36px;
+      top: 42px;
       left: 0;
-      background-color: white;
-      color: black;
+      background-color: #101020;
+      color: #00ffff;
+      border: 2px solid #ff00ff;
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       display: none;
       z-index: 1001;
-      min-width: 120px;
+      min-width: 140px;
+      font-weight: bold;
     }
 
     .dropdown-menu a,
@@ -68,16 +89,20 @@
       display: block;
       padding: 10px 16px;
       font-size: 14px;
+      font-weight: normal;
       background: none;
       border: none;
       width: 100%;
       text-align: left;
       cursor: pointer;
+      color: #00ffff;
+      text-decoration: none;
+      box-sizing: border-box;
     }
 
     .dropdown-menu a:hover,
     .dropdown-menu button:hover {
-      background-color: #f0f0f0;
+      background-color: rgba(255, 0, 255, 0.2);
     }
 
     #scoreDisplay {
@@ -105,7 +130,7 @@
       <button id="usernameDisplay" class="dropdown-toggle">Loading ▼</button>
       <div class="dropdown-menu" id="userMenu">
         <a href="stats.html">My Stats</a>
-        <button onclick="alert('Logout functionality goes here')">Logout</button>
+        <button id="logoutBtn">Logout</button>
       </div>
     </div>
     <a href="index.html" class="logo-link" style="margin-right: 28px;">
@@ -115,6 +140,67 @@
 
   <div id="scoreDisplay">Score: 0</div>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+      authDomain: "wacky-wings.firebaseapp.com",
+      projectId: "wacky-wings",
+      storageBucket: "wacky-wings.appspot.com",
+      messagingSenderId: "86787566584",
+      appId: "1:86787566584:web:a4e421c1259763d061c40d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const userMenu = document.getElementById("userMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    usernameDisplay.addEventListener("click", () => {
+      const visible = userMenu.style.display === "block";
+      userMenu.style.display = visible ? "none" : "block";
+      usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, visible ? "▼" : "▲");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!usernameDisplay.contains(e.target) && !userMenu.contains(e.target)) {
+        userMenu.style.display = "none";
+        if (!usernameDisplay.textContent.endsWith("▼")) {
+          usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, "▼");
+        }
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          const username = userDoc.exists() ? userDoc.data().username : "User";
+          usernameDisplay.textContent = `${username} ▼`;
+        } catch {
+          usernameDisplay.textContent = "User ▼";
+        }
+      } else {
+        usernameDisplay.textContent = "Guest ▼";
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
+    });
+  </script>
 
   <script type="module" src="game.js"></script>
 </body>
