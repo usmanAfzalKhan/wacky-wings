@@ -1,5 +1,3 @@
-// game.js
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -17,10 +15,10 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-// ✅ MOBILE TWEAKS
-const pipeSpeed = isMobile ? 1.8 : 3.3;
-const pipeSpacing = isMobile ? 90 : 90;
-const pipeGap = isMobile ? 190 : 165;
+// ✅ Flappy Bird–style mobile settings
+const pipeSpeed = isMobile ? 2.2 : 3.3;
+const pipeSpacing = isMobile ? 95 : 90;
+const pipeGap = isMobile ? 170 : 165;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -52,9 +50,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.23 : 0.5,
-  jumpStrength: isMobile ? -2.4 : -6.2,
-  maxVelocity: 8,
+  gravity: isMobile ? 0.26 : 0.5,
+  jumpStrength: isMobile ? -2.9 : -6.2,
+  maxVelocity: 10,
   angle: 0
 };
 
