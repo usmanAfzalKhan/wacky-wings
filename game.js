@@ -15,10 +15,10 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-// ✅ Flappy Bird–style mobile settings
-const pipeSpeed = isMobile ? 2.2 : 3.3;
-const pipeSpacing = isMobile ? 95 : 90;
-const pipeGap = isMobile ? 170 : 165;
+// ✅ Final Flappy Bird–style tweaks
+const pipeSpeed = isMobile ? 1.55 : 3.3;
+const pipeSpacing = isMobile ? 100 : 90;
+const pipeGap = isMobile ? 180 : 165;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -50,8 +50,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.26 : 0.5,
-  jumpStrength: isMobile ? -2.9 : -6.2,
+  gravity: isMobile ? 0.27 : 0.5,
+  jumpStrength: isMobile ? -3.1 : -6.2,
   maxVelocity: 10,
   angle: 0
 };
