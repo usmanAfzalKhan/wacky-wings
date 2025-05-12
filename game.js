@@ -15,10 +15,10 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-// ✅ Final Flappy Bird–style tweaks
-const pipeSpeed = isMobile ? 1.55 : 3.3;
-const pipeSpacing = isMobile ? 100 : 90;
-const pipeGap = isMobile ? 180 : 165;
+// ✅ Smoother, more natural mobile tuning
+const pipeSpeed = isMobile ? 1.3 : 3.3;
+const pipeSpacing = isMobile ? 110 : 90;
+const pipeGap = isMobile ? 190 : 165;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -45,14 +45,14 @@ pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
 const bird = {
-  width: isMobile ? 28 : 40,
-  height: isMobile ? 28 : 40,
+  width: isMobile ? 30 : 40,
+  height: isMobile ? 30 : 40,
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.27 : 0.5,
-  jumpStrength: isMobile ? -3.1 : -6.2,
-  maxVelocity: 10,
+  gravity: isMobile ? 0.21 : 0.5,
+  jumpStrength: isMobile ? -2.6 : -6.2,
+  maxVelocity: 8,
   angle: 0
 };
 
