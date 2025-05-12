@@ -51,7 +51,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: isMobile ? 0.21 : 0.5,
-  jumpStrength: isMobile ? -2.8 : -6.2,
+  jumpStrength: isMobile ? -2.95 : -6.2,
   maxVelocity: 8,
   angle: 0
 };
