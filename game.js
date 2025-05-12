@@ -15,9 +15,9 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-// ✅ Smoother, more natural mobile tuning
+// ✅ Final mobile feel
 const pipeSpeed = isMobile ? 1.3 : 3.3;
-const pipeSpacing = isMobile ? 110 : 90;
+const pipeSpacing = isMobile ? 118 : 90;
 const pipeGap = isMobile ? 190 : 165;
 
 const birdImg = new Image();
@@ -51,7 +51,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: isMobile ? 0.21 : 0.5,
-  jumpStrength: isMobile ? -2.6 : -6.2,
+  jumpStrength: isMobile ? -2.65 : -6.2,
   maxVelocity: 8,
   angle: 0
 };
