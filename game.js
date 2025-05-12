@@ -17,8 +17,8 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-const pipeSpeed = isMobile ? 2.4 : 3.3;
-const pipeSpacing = isMobile ? 75 : 90;
+const pipeSpeed = isMobile ? 1.8 : 3.3;
+const pipeSpacing = isMobile ? 80 : 90;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -45,14 +45,14 @@ pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
 const bird = {
-  width: isMobile ? 26 : 40,
-  height: isMobile ? 26 : 40,
+  width: isMobile ? 28 : 40,
+  height: isMobile ? 28 : 40,
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.28 : 0.5,
-  jumpStrength: isMobile ? -2.7 : -6.2,
-  maxVelocity: 10,
+  gravity: isMobile ? 0.23 : 0.5,
+  jumpStrength: isMobile ? -2.3 : -6.2,
+  maxVelocity: 8,
   angle: 0
 };
 
