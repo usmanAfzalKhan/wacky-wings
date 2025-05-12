@@ -17,8 +17,10 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
+// ✅ MOBILE TWEAKS
 const pipeSpeed = isMobile ? 1.8 : 3.3;
-const pipeSpacing = isMobile ? 80 : 90;
+const pipeSpacing = isMobile ? 90 : 90;
+const pipeGap = isMobile ? 190 : 165;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -51,7 +53,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: isMobile ? 0.23 : 0.5,
-  jumpStrength: isMobile ? -2.3 : -6.2,
+  jumpStrength: isMobile ? -2.4 : -6.2,
   maxVelocity: 8,
   angle: 0
 };
@@ -59,7 +61,6 @@ const bird = {
 const pipes = [];
 const pipeWidth = 60;
 const pipeTileHeight = 60;
-const pipeGap = 165;
 let frameCount = 0;
 let bgX = 0;
 
