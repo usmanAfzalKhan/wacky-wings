@@ -1,5 +1,7 @@
+// === Wacky Wings FINAL FIX: Lag reduced, sound fixed, REBOOT enabled ===
+
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: false });
 
 canvas.style.width = "400px";
 canvas.style.height = "600px";
@@ -23,10 +25,10 @@ const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
 
-const pipeSpeed = isMobile ? 1.3 : 3.3;
-const pipeSpacing = isMobile ? 145 : 90;
-const pipeGap = isMobile ? 230 : 165;
-const jumpStrength = isAndroid ? -3.65 : (isMobile ? -3.1 : -6.2);
+const pipeSpeed = isMobile ? 1.2 : 3.3;
+const pipeSpacing = isMobile ? 150 : 90;
+const pipeGap = isMobile ? 240 : 165;
+const jumpStrength = isAndroid ? -3.8 : (isMobile ? -3.3 : -6.2);
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -37,7 +39,7 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-const flapSound = !isMobile ? new Audio("audio/flap.mp3") : null;
+const flapSound = !isiOS ? new Audio("audio/flap.mp3") : null;
 if (flapSound) {
   flapSound.volume = 0.35;
   flapSound.playsInline = true;
@@ -60,7 +62,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isMobile ? 0.21 : 0.5,
+  gravity: isMobile ? 0.22 : 0.5,
   jumpStrength,
   maxVelocity: 8,
   angle: 0
@@ -217,9 +219,9 @@ function updateBird() {
   const maxDown = 60 * Math.PI / 180;
   const maxUp = -30 * Math.PI / 180;
   bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
-  if (bird.y + bird.height > canvas.height / scale) {
-    bird.y = canvas.height / scale - bird.height;
+  if (bird.y + bird.height >= canvas.height / scale) {
     gameOver = true;
+    drawFlatlined();
   }
   if (bird.y < 0) bird.y = 0;
 }
