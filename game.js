@@ -1,4 +1,4 @@
-// === Wacky Wings FINAL FIX: Lag reduced, sound fixed, REBOOT enabled ===
+// === Wacky Wings FINAL FIX: UI cleanup, iOS optimized ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
@@ -10,25 +10,45 @@ canvas.width = 400 * scale;
 canvas.height = 600 * scale;
 ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
+// === REMAINING VARIABLES ===
+let scoreDisplay = document.getElementById("scoreDisplay");
+if (!scoreDisplay) {
+  scoreDisplay = document.createElement("div");
+  scoreDisplay.id = "scoreDisplay";
+  scoreDisplay.style.marginTop = "60px";
+  scoreDisplay.style.fontSize = "20px";
+  scoreDisplay.style.fontWeight = "bold";
+  scoreDisplay.style.color = "black";
+  scoreDisplay.style.backgroundColor = "rgba(255,255,255,0.8)";
+  scoreDisplay.style.padding = "6px 10px";
+  scoreDisplay.style.borderRadius = "8px";
+  scoreDisplay.style.display = "inline-block";
+  scoreDisplay.textContent = "Score: 0";
+  document.body.appendChild(scoreDisplay);
+}
+
+// === SOUND TOGGLE BUTTON ALIGNED RIGHT OF SCORE ===
 let soundOn = true;
+const soundBox = document.createElement("div");
+soundBox.id = "soundToggleBox";
+soundBox.style.display = "inline-block";
+soundBox.style.marginLeft = "10px";
+soundBox.style.backgroundColor = "#101020";
+soundBox.style.border = "2px solid #00ffff";
+soundBox.style.padding = "6px 12px";
+soundBox.style.borderRadius = "10px";
+soundBox.style.color = "#00ffff";
+soundBox.style.fontWeight = "bold";
+soundBox.style.fontFamily = "Segoe UI, sans-serif";
+soundBox.style.userSelect = "none";
+soundBox.style.cursor = "pointer";
+soundBox.style.verticalAlign = "middle";
+soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
+scoreDisplay.after(soundBox);
 
-const scoreDisplay = document.getElementById("scoreDisplay");
-const soundToggleBtn = document.createElement("button");
-soundToggleBtn.id = "soundToggleBtn";
-soundToggleBtn.textContent = `Sound: ${soundOn ? 'ON' : 'OFF'}`;
-soundToggleBtn.style.marginLeft = '10px';
-soundToggleBtn.style.padding = '4px 10px';
-soundToggleBtn.style.fontWeight = 'bold';
-soundToggleBtn.style.borderRadius = '6px';
-soundToggleBtn.style.border = '2px solid #00ffff';
-soundToggleBtn.style.backgroundColor = '#101020';
-soundToggleBtn.style.color = '#00ffff';
-soundToggleBtn.style.cursor = 'pointer';
-scoreDisplay.appendChild(soundToggleBtn);
-
-soundToggleBtn.addEventListener("click", () => {
+soundBox.addEventListener("click", () => {
   soundOn = !soundOn;
-  soundToggleBtn.textContent = `Sound: ${soundOn ? 'ON' : 'OFF'}`;
+  soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
 });
 
 let score = 0;
@@ -86,6 +106,9 @@ const bird = {
   maxVelocity: 8,
   angle: 0
 };
+
+// === REMAINING CODE UNCHANGED ===
+
 
 const pipes = [];
 const pipeWidth = 60;
