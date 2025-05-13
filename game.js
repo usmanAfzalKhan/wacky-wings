@@ -1,6 +1,13 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// ✅ Scale canvas for Retina/High-DPI displays
+const scale = window.devicePixelRatio || 1;
+canvas.width = canvas.clientWidth * scale;
+canvas.height = canvas.clientHeight * scale;
+ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+
 const scoreDisplay = document.getElementById("scoreDisplay");
 let score = 0;
 let gameOver = false;
@@ -9,13 +16,13 @@ let gameStarted = false;
 let soundOn = true;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
+let justFlapped = false; // Prevent double taps on iOS
 
 const userAgent = navigator.userAgent || "";
 const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
-// ✅ Final comfort tweaks
 const pipeSpeed = isMobile ? 1.3 : 3.3;
 const pipeSpacing = isMobile ? 125 : 90;
 const pipeGap = isMobile ? 200 : 165;
@@ -73,6 +80,47 @@ function unlockAudio() {
   }
 }
 
+function flap() {
+  if (!gameStarted || awaitingFirstFlap) {
+    awaitingFirstFlap = false;
+    return;
+  }
+  if (gameOver && allowRestart) {
+    restartGame();
+  } else if (!gameOver) {
+    bird.velocity = bird.jumpStrength;
+    bird.angle = -30 * (Math.PI / 180);
+    if (soundOn) {
+      flapSound.currentTime = 0;
+      flapSound.play();
+    }
+  }
+}
+
+canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  if (justFlapped) return;
+  justFlapped = true;
+  flap();
+  setTimeout(() => justFlapped = false, 120);
+});
+
+canvas.addEventListener("click", (e) => {
+  if (justFlapped) return;
+  justFlapped = true;
+  flap();
+  setTimeout(() => justFlapped = false, 120);
+});
+
+document.addEventListener("keydown", (e) => {
+  unlockAudio();
+  if (!gameStarted && e.code === "Space") {
+    gameStarted = true;
+    awaitingFirstFlap = true;
+    gameLoop();
+  } else if (e.code === "Space") flap();
+});
+
 function createPipe() {
   const minTopY = 50;
   const maxTopY = canvas.height - pipeGap - 50;
@@ -88,11 +136,12 @@ function updatePipes() {
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       pipe.passed = true;
       score++;
-      scoreDisplay.textContent = `Score: ${score}`;
+      if (scoreDisplay.textContent !== `Score: ${score}`) {
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
       if (soundOn) {
-        const point = pointSound.cloneNode(true);
-        point.volume = 0.35;
-        point.play();
+        pointSound.currentTime = 0;
+        pointSound.play();
       }
     }
   });
@@ -174,28 +223,10 @@ function drawFlatlined() {
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
   if (soundOn) {
-    const dead = deadSound.cloneNode(true);
-    dead.volume = 0.25;
-    dead.play();
+    deadSound.currentTime = 0;
+    deadSound.play();
   }
   allowRestart = true;
-}
-
-function flap() {
-  if (!gameStarted || awaitingFirstFlap) {
-    awaitingFirstFlap = false;
-    return;
-  }
-  if (gameOver && allowRestart) restartGame();
-  else if (!gameOver) {
-    bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * (Math.PI / 180);
-    if (soundOn) {
-      const flap = flapSound.cloneNode(true);
-      flap.volume = 0.35;
-      flap.play();
-    }
-  }
 }
 
 function restartGame() {
@@ -253,35 +284,5 @@ function handleStartMenuClick(x, y) {
     else if (gameOver) drawFlatlined();
   }
 }
-
-canvas.addEventListener("click", (e) => {
-  unlockAudio();
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  if (!gameStarted) handleStartMenuClick(x, y);
-  else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) restartGame();
-  else flap();
-});
-
-canvas.addEventListener("touchstart", (e) => {
-  unlockAudio();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-  if (!gameStarted) handleStartMenuClick(x, y);
-  else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) restartGame();
-  else flap();
-});
-
-document.addEventListener("keydown", (e) => {
-  unlockAudio();
-  if (!gameStarted && e.code === "Space") {
-    gameStarted = true;
-    awaitingFirstFlap = true;
-    gameLoop();
-  } else if (e.code === "Space") flap();
-});
 
 bgImg.onload = () => drawStartMenu();

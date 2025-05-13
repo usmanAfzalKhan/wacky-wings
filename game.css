@@ -92,3 +92,9 @@ body {
     border: 2px solid #000;
   }
   
+  canvas {
+    touch-action: none;
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
