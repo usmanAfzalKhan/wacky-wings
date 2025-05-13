@@ -1,17 +1,14 @@
-// === Wacky Wings Retina Canvas Fix + iOS Patch ===
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set fixed CSS display size (logical resolution)
+// Fixed canvas size for all devices
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 
-// Scale internal resolution for high-DPI (Retina)
 const scale = window.devicePixelRatio || 1;
 canvas.width = 400 * scale;
 canvas.height = 600 * scale;
-ctx.scale(scale, scale); // Scale drawing context
+ctx.scale(scale, scale);
 
 const scoreDisplay = document.getElementById("scoreDisplay");
 let score = 0;
@@ -102,20 +99,32 @@ function flap() {
   }
 }
 
-canvas.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  if (justFlapped) return;
-  justFlapped = true;
-  flap();
-  setTimeout(() => justFlapped = false, 120);
-});
+function getTouchOrClickPosition(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.touches?.[0]?.clientX || e.clientX) - rect.left;
+  const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
+  return { x, y };
+}
 
-canvas.addEventListener("click", (e) => {
-  if (justFlapped) return;
-  justFlapped = true;
-  flap();
-  setTimeout(() => justFlapped = false, 120);
-});
+function handleInput(e) {
+  e.preventDefault();
+  unlockAudio();
+  const { x, y } = getTouchOrClickPosition(e);
+
+  if (!gameStarted) {
+    handleStartMenuClick(x, y);
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    if (justFlapped) return;
+    justFlapped = true;
+    flap();
+    setTimeout(() => justFlapped = false, 120);
+  }
+}
+
+canvas.addEventListener("touchstart", handleInput);
+canvas.addEventListener("click", handleInput);
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();
