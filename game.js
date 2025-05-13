@@ -1,26 +1,17 @@
+// === Wacky Wings Retina Canvas Fix + iOS Patch ===
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Only scale if canvas has client dimensions
-function scaleCanvas() {
-  const scale = window.devicePixelRatio || 1;
+// Set fixed CSS display size (logical resolution)
+canvas.style.width = "400px";
+canvas.style.height = "600px";
 
-  // Set display size (CSS pixels)
-  const cssWidth = canvas.offsetWidth;
-  const cssHeight = canvas.offsetHeight;
-
-  if (cssWidth === 0 || cssHeight === 0) return; // Prevent scaling if layout not ready
-
-  canvas.width = cssWidth * scale;
-  canvas.height = cssHeight * scale;
-
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
-}
-
-window.addEventListener("load", scaleCanvas);
-window.addEventListener("resize", scaleCanvas);
-
-
+// Scale internal resolution for high-DPI (Retina)
+const scale = window.devicePixelRatio || 1;
+canvas.width = 400 * scale;
+canvas.height = 600 * scale;
+ctx.scale(scale, scale); // Scale drawing context
 
 const scoreDisplay = document.getElementById("scoreDisplay");
 let score = 0;
@@ -30,7 +21,7 @@ let gameStarted = false;
 let soundOn = true;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
-let justFlapped = false; // Prevent double taps on iOS
+let justFlapped = false;
 
 const userAgent = navigator.userAgent || "";
 const isiOS = /iPhone|iPad|iPod/.test(userAgent);
@@ -137,9 +128,9 @@ document.addEventListener("keydown", (e) => {
 
 function createPipe() {
   const minTopY = 50;
-  const maxTopY = canvas.height - pipeGap - 50;
+  const maxTopY = 600 - pipeGap - 50;
   const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
-  pipes.push({ x: canvas.width, topY, bottomY: topY + pipeGap, passed: false });
+  pipes.push({ x: 400, topY, bottomY: topY + pipeGap, passed: false });
 }
 
 function updatePipes() {
@@ -163,9 +154,9 @@ function updatePipes() {
 
 function drawBackground() {
   bgX -= pipeSpeed / 2;
-  if (bgX <= -canvas.width) bgX = 0;
-  ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
-  ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+  if (bgX <= -400) bgX = 0;
+  ctx.drawImage(bgImg, bgX, 0, 400, 600);
+  ctx.drawImage(bgImg, bgX + 400, 0, 400, 600);
 }
 
 function drawPipes() {
@@ -177,7 +168,7 @@ function drawPipes() {
       ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
       ctx.restore();
     }
-    for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
+    for (let y = pipe.bottomY; y < 600; y += pipeTileHeight) {
       ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
     }
   });
@@ -190,7 +181,7 @@ function updateBird() {
   const maxDown = 60 * Math.PI / 180;
   const maxUp = -30 * Math.PI / 180;
   bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
-  if (bird.y + bird.height > canvas.height) bird.y = canvas.height - bird.height;
+  if (bird.y + bird.height > 600) bird.y = 600 - bird.height;
   if (bird.y < 0) bird.y = 0;
 }
 
@@ -211,7 +202,7 @@ function checkCollision() {
     const hitsBottom = birdBottom > pipe.bottomY;
     if (withinPipeX && (hitsTop || hitsBottom)) return true;
   }
-  return bird.y <= 0 || bird.y + bird.height >= canvas.height;
+  return bird.y <= 0 || bird.y + bird.height >= 600;
 }
 
 function drawCyberButton(x, y, w, h, label) {
@@ -227,15 +218,15 @@ function drawCyberButton(x, y, w, h, label) {
 
 function drawFlatlined() {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, 400, 600);
   ctx.fillStyle = "#ff3366";
   ctx.font = "bold 28px 'Segoe UI'";
-  ctx.fillText("FLATLINED", canvas.width / 2 - 80, 240);
+  ctx.fillText("FLATLINED", 160, 240);
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText(`Score: ${score}`, canvas.width / 2 - 30, 280);
+  ctx.fillText(`Score: ${score}`, 185, 280);
   drawCyberButton(140, 310, 120, 40, "REBOOT");
-  drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
+  drawCyberButton(290, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
   if (soundOn) {
     deadSound.currentTime = 0;
     deadSound.play();
@@ -257,7 +248,7 @@ function restartGame() {
 }
 
 function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, 400, 600);
   drawBackground();
   updatePipes();
   drawPipes();
@@ -278,13 +269,13 @@ function drawStartMenu() {
   drawBackground();
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, 400, 600);
   ctx.font = "16px 'Segoe UI'";
   const message = isMobile ? "Tap to flap" : "Press spacebar to flap";
   ctx.fillStyle = "#fff";
-  ctx.fillText(message, canvas.width / 2 - ctx.measureText(message).width / 2, 230);
+  ctx.fillText(message, 200 - ctx.measureText(message).width / 2, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
-  drawCyberButton(canvas.width - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
+  drawCyberButton(290, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
 }
 
 function handleStartMenuClick(x, y) {
@@ -292,7 +283,7 @@ function handleStartMenuClick(x, y) {
     gameStarted = true;
     awaitingFirstFlap = true;
     gameLoop();
-  } else if (x >= canvas.width - 110 && x <= canvas.width - 10 && y >= 10 && y <= 40) {
+  } else if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
     soundOn = !soundOn;
     if (!gameStarted) drawStartMenu();
     else if (gameOver) drawFlatlined();
