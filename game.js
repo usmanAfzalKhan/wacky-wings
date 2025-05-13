@@ -1,11 +1,25 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// ✅ Scale canvas for Retina/High-DPI displays
-const scale = window.devicePixelRatio || 1;
-canvas.width = canvas.clientWidth * scale;
-canvas.height = canvas.clientHeight * scale;
-ctx.setTransform(scale, 0, 0, scale, 0, 0);
+// Only scale if canvas has client dimensions
+function scaleCanvas() {
+  const scale = window.devicePixelRatio || 1;
+
+  // Set display size (CSS pixels)
+  const cssWidth = canvas.offsetWidth;
+  const cssHeight = canvas.offsetHeight;
+
+  if (cssWidth === 0 || cssHeight === 0) return; // Prevent scaling if layout not ready
+
+  canvas.width = cssWidth * scale;
+  canvas.height = cssHeight * scale;
+
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+}
+
+window.addEventListener("load", scaleCanvas);
+window.addEventListener("resize", scaleCanvas);
+
 
 
 const scoreDisplay = document.getElementById("scoreDisplay");
