@@ -66,8 +66,8 @@ const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
 
 const pipeSpeed = isMobile ? 1.2 : 3.3;
 const pipeSpacing = isMobile ? 150 : 90;
-const pipeGap = isMobile ? 240 : 165;
-const jumpStrength = isAndroid ? -3.8 : (isMobile ? -3.3 : -6.2);
+const pipeGap = isMobile ? 210 : 165; // Gap reduced slightly
+const jumpStrength = isAndroid || isiOS ? -3.8 : -6.2; // Unified jump for Android and iOS
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -107,7 +107,16 @@ const bird = {
   angle: 0
 };
 
-// === REMAINING CODE UNCHANGED ===
+// Prevent double tap on iOS
+document.addEventListener("touchstart", (e) => {
+  if (isiOS && justFlapped) {
+    e.preventDefault();
+    return;
+  }
+  justFlapped = true;
+  setTimeout(() => justFlapped = false, 150);
+}, { passive: false });
+
 
 
 const pipes = [];
