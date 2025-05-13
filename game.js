@@ -1,4 +1,4 @@
-// === Wacky Wings FINAL FIXED VERSION + RENDER RESTORE ===
+// === Wacky Wings FINAL PATCH: Input & Button Fixes ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -102,6 +102,17 @@ function drawBird() {
   ctx.restore();
 }
 
+function drawCyberButton(x, y, w, h, label) {
+  ctx.fillStyle = "#00ffff";
+  ctx.strokeStyle = "#ff00ff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, w, h);
+  ctx.font = "bold 14px 'Segoe UI'";
+  ctx.fillStyle = "#000";
+  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
+}
+
 function drawStartMenu() {
   drawBackground();
   drawBird();
@@ -114,5 +125,50 @@ function drawStartMenu() {
   drawCyberButton(140, 250, 120, 40, "START GAME");
   drawCyberButton(290, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
 }
+
+function handleStartMenuClick(x, y) {
+  if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    gameStarted = true;
+    awaitingFirstFlap = true;
+    gameLoop();
+  }
+}
+
+function handleInput(e) {
+  e.preventDefault();
+  unlockAudio();
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.touches?.[0]?.clientX || e.clientX) - rect.left;
+  const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
+
+  if (!gameStarted) {
+    // Check sound button first
+    if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
+      soundOn = !soundOn;
+      drawStartMenu();
+      return;
+    }
+    handleStartMenuClick(x, y);
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    if (justFlapped) return;
+    justFlapped = true;
+    flap();
+    setTimeout(() => justFlapped = false, 120);
+  }
+}
+
+canvas.addEventListener("touchstart", handleInput);
+canvas.addEventListener("click", handleInput);
+
+document.addEventListener("keydown", (e) => {
+  unlockAudio();
+  if (!gameStarted && e.code === "Space") {
+    gameStarted = true;
+    awaitingFirstFlap = true;
+    gameLoop();
+  } else if (e.code === "Space") flap();
+});
 
 bgImg.onload = () => drawStartMenu();
