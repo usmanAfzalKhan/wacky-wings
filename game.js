@@ -1,5 +1,3 @@
-// === Wacky Wings FULLY FIXED: Game Start + Sound Toggle + Mobile Compatibility ===
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -87,11 +85,27 @@ function unlockAudio() {
   }
 }
 
+function flap() {
+  if (!gameStarted || awaitingFirstFlap) {
+    awaitingFirstFlap = false;
+    return;
+  }
+  if (gameOver && allowRestart) restartGame();
+  else if (!gameOver) {
+    bird.velocity = bird.jumpStrength;
+    bird.angle = -30 * (Math.PI / 180);
+    if (soundOn && flapSound) {
+      flapSound.currentTime = 0;
+      flapSound.play();
+    }
+  }
+}
+
 function drawBackground() {
   bgX -= pipeSpeed / 2;
-  if (bgX <= -400) bgX = 0;
-  ctx.drawImage(bgImg, bgX, 0, 400, 600);
-  ctx.drawImage(bgImg, bgX + 400, 0, 400, 600);
+  if (bgX <= -canvas.width / scale) bgX = 0;
+  ctx.drawImage(bgImg, bgX, 0, canvas.width / scale, canvas.height / scale);
+  ctx.drawImage(bgImg, bgX + canvas.width / scale, 0, canvas.width / scale, canvas.height / scale);
 }
 
 function drawBird() {
@@ -117,56 +131,182 @@ function drawStartMenu() {
   drawBackground();
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, 400, 600);
+  ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
   ctx.font = "16px 'Segoe UI'";
   const message = isMobile ? "Tap to flap" : "Press spacebar or click to start";
   ctx.fillStyle = "#fff";
-  ctx.fillText(message, 200 - ctx.measureText(message).width / 2, 230);
+  ctx.fillText(message, canvas.width / scale / 2 - ctx.measureText(message).width / 2, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
-  drawCyberButton(290, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
+  drawCyberButton(canvas.width / scale - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
 }
 
-function handleStartMenuClick(x, y) {
-  if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-    gameStarted = true;
-    awaitingFirstFlap = true;
-    gameLoop();
+function createPipe() {
+  const minTopY = 50;
+  const maxTopY = canvas.height / scale - pipeGap - 50;
+  const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
+  pipes.push({ x: canvas.width / scale, topY, bottomY: topY + pipeGap, passed: false });
+}
+
+function updatePipes() {
+  pipes.forEach(pipe => pipe.x -= pipeSpeed);
+  if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
+  if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
+  pipes.forEach(pipe => {
+    if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+      pipe.passed = true;
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+      if (soundOn) {
+        const point = pointSound.cloneNode(true);
+        point.volume = 0.35;
+        point.play();
+      }
+    }
+  });
+}
+
+function drawPipes() {
+  pipes.forEach(pipe => {
+    for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
+      ctx.save();
+      ctx.translate(pipe.x, y + pipeTileHeight);
+      ctx.scale(1, -1);
+      ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
+      ctx.restore();
+    }
+    for (let y = pipe.bottomY; y < canvas.height / scale; y += pipeTileHeight) {
+      ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
+    }
+  });
+}
+
+function checkCollision() {
+  for (const pipe of pipes) {
+    const birdRight = bird.x + bird.width;
+    const birdBottom = bird.y + bird.height;
+    const withinPipeX = birdRight > pipe.x && bird.x < pipe.x + pipeWidth;
+    const hitsTop = bird.y < pipe.topY;
+    const hitsBottom = birdBottom > pipe.bottomY;
+    if (withinPipeX && (hitsTop || hitsBottom)) return true;
   }
-  if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
-    soundOn = !soundOn;
-    drawStartMenu();
+  return bird.y <= 0 || bird.y + bird.height >= canvas.height / scale;
+}
+
+function drawFlatlined() {
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#ff3366";
+  ctx.font = "bold 28px 'Segoe UI'";
+  ctx.fillText("FLATLINED", 120, 240);
+  ctx.font = "18px 'Segoe UI'";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(`Score: ${score}`, 170, 280);
+  drawCyberButton(140, 310, 120, 40, "REBOOT");
+  allowRestart = true;
+  if (soundOn) {
+    const dead = deadSound.cloneNode(true);
+    dead.volume = 0.25;
+    dead.play();
   }
 }
 
-function handleInput(e) {
-  e.preventDefault();
-  unlockAudio();
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.touches?.[0]?.clientX || e.clientX) - rect.left;
-  const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
-
-  if (!gameStarted) {
-    handleStartMenuClick(x, y);
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    if (justFlapped) return;
-    justFlapped = true;
-    flap();
-    setTimeout(() => justFlapped = false, 120);
+function updateBird() {
+  bird.velocity += bird.gravity;
+  bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
+  bird.y += bird.velocity;
+  const maxDown = 60 * Math.PI / 180;
+  const maxUp = -30 * Math.PI / 180;
+  bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, maxDown) : maxUp;
+  if (bird.y + bird.height > canvas.height / scale) {
+    bird.y = canvas.height / scale - bird.height;
+    gameOver = true;
   }
+  if (bird.y < 0) bird.y = 0;
 }
 
-canvas.addEventListener("touchstart", handleInput);
-canvas.addEventListener("click", handleInput);
+function restartGame() {
+  score = 0;
+  gameOver = false;
+  allowRestart = false;
+  pipes.length = 0;
+  bird.y = 200;
+  bird.velocity = 0;
+  bird.angle = 0;
+  frameCount = 0;
+  scoreDisplay.textContent = "Score: 0";
+  gameLoop();
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  updateBird();
+  updatePipes();
+  drawPipes();
+  drawBird();
+  if (!gameOver && checkCollision()) {
+    gameOver = true;
+    drawFlatlined();
+    return;
+  }
+  frameCount++;
+  if (!gameOver) requestAnimationFrame(gameLoop);
+}
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();
+  if (e.code === "Space") {
+    if (!gameStarted) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else {
+      flap();
+    }
+  }
+});
+
+canvas.addEventListener("mousedown", (e) => {
+  unlockAudio();
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
   if (!gameStarted) {
-    gameStarted = true;
-    awaitingFirstFlap = true;
-    gameLoop();
-  } else if (e.code === "Space") flap();
+    if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else if (x >= canvas.width / scale - 110 && x <= canvas.width / scale - 10 && y >= 10 && y <= 40) {
+      soundOn = !soundOn;
+      drawStartMenu();
+    }
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    flap();
+  }
+});
+
+canvas.addEventListener("touchstart", (e) => {
+  unlockAudio();
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  if (!gameStarted) {
+    if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else if (x >= canvas.width / scale - 110 && x <= canvas.width / scale - 10 && y >= 10 && y <= 40) {
+      soundOn = !soundOn;
+      drawStartMenu();
+    }
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    flap();
+  }
 });
 
 bgImg.onload = () => drawStartMenu();
