@@ -1,4 +1,4 @@
-// === Wacky Wings FINAL PATCH: Input, Message, and Game Start Fixes ===
+// === Wacky Wings FULLY FIXED: Game Start + Sound Toggle + Mobile Compatibility ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -8,7 +8,7 @@ canvas.style.height = "600px";
 const scale = window.devicePixelRatio || 1;
 canvas.width = 400 * scale;
 canvas.height = 600 * scale;
-ctx.scale(scale, scale);
+ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
 const scoreDisplay = document.getElementById("scoreDisplay");
 let score = 0;
@@ -132,6 +132,10 @@ function handleStartMenuClick(x, y) {
     awaitingFirstFlap = true;
     gameLoop();
   }
+  if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
+    soundOn = !soundOn;
+    drawStartMenu();
+  }
 }
 
 function handleInput(e) {
@@ -142,11 +146,6 @@ function handleInput(e) {
   const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
 
   if (!gameStarted) {
-    if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
-      soundOn = !soundOn;
-      drawStartMenu();
-      return;
-    }
     handleStartMenuClick(x, y);
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
