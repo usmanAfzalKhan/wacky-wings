@@ -1,4 +1,4 @@
-// === Wacky Wings FINAL FIXED VERSION ===
+// === Wacky Wings FINAL FIXED VERSION + RENDER RESTORE ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -87,63 +87,32 @@ function unlockAudio() {
   }
 }
 
-function flap() {
-  if (!gameStarted || awaitingFirstFlap) {
-    awaitingFirstFlap = false;
-    return;
-  }
-  if (gameOver && allowRestart) {
-    restartGame();
-  } else if (!gameOver) {
-    bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * (Math.PI / 180);
-    if (soundOn && flapSound) {
-      flapSound.currentTime = 0;
-      flapSound.play();
-    }
-  }
+function drawBackground() {
+  bgX -= pipeSpeed / 2;
+  if (bgX <= -400) bgX = 0;
+  ctx.drawImage(bgImg, bgX, 0, 400, 600);
+  ctx.drawImage(bgImg, bgX + 400, 0, 400, 600);
 }
 
-function getTouchOrClickPosition(e) {
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.touches?.[0]?.clientX || e.clientX) - rect.left;
-  const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
-  return { x, y };
+function drawBird() {
+  ctx.save();
+  ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
+  ctx.rotate(bird.angle);
+  ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
+  ctx.restore();
 }
 
-function handleInput(e) {
-  e.preventDefault();
-  unlockAudio();
-  const { x, y } = getTouchOrClickPosition(e);
-
-  // Check sound toggle first
-  if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
-    soundOn = !soundOn;
-    if (!gameStarted) drawStartMenu();
-    else if (gameOver) drawFlatlined();
-    return;
-  }
-
-  if (!gameStarted) {
-    handleStartMenuClick(x, y);
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    if (justFlapped) return;
-    justFlapped = true;
-    flap();
-    setTimeout(() => justFlapped = false, 120);
-  }
+function drawStartMenu() {
+  drawBackground();
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, 400, 600);
+  ctx.font = "16px 'Segoe UI'";
+  const message = isMobile ? "Tap to flap" : "Press spacebar to flap";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(message, 200 - ctx.measureText(message).width / 2, 230);
+  drawCyberButton(140, 250, 120, 40, "START GAME");
+  drawCyberButton(290, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
 }
 
-canvas.addEventListener("touchstart", handleInput);
-canvas.addEventListener("click", handleInput);
-
-document.addEventListener("keydown", (e) => {
-  unlockAudio();
-  if (!gameStarted && e.code === "Space") {
-    gameStarted = true;
-    awaitingFirstFlap = true;
-    gameLoop();
-  } else if (e.code === "Space") flap();
-});
+bgImg.onload = () => drawStartMenu();
