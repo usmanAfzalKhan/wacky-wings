@@ -6,9 +6,9 @@ const ctx = canvas.getContext("2d", { alpha: false });
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 const scale = window.devicePixelRatio || 1;
-canvas.width = 400 * scale;
-canvas.height = 600 * scale;
-ctx.setTransform(scale, 0, 0, scale, 0, 0);
+canvas.width = 400;
+canvas.height = 600;
+ctx.setTransform(1, 0, 0, 1, 0, 0);
 
 // === REMAINING VARIABLES ===
 let scoreDisplay = document.getElementById("scoreDisplay");
@@ -338,22 +338,24 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("touchstart", (e) => {
-  unlockAudio();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-  if (!gameStarted) {
-    if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    const now = Date.now();
+    if (now - lastTouchTime < 350) return; // 350ms lockout
+    lastTouchTime = now;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+  
+    if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
       gameStarted = true;
       awaitingFirstFlap = false;
       gameLoop();
+    } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+      restartGame();
+    } else {
+      flap();
     }
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    flap();
-  }
-});
+  }, { passive: false });
+  
 
 bgImg.onload = () => drawStartMenu();
