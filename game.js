@@ -1,4 +1,4 @@
-// === Wacky Wings FINAL PATCH: Input & Button Fixes ===
+// === Wacky Wings FINAL PATCH: Input, Message, and Game Start Fixes ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -23,7 +23,7 @@ let justFlapped = false;
 const userAgent = navigator.userAgent || "";
 const isiOS = /iPhone|iPad|iPod/.test(userAgent);
 const isAndroid = /Android/.test(userAgent);
-const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
 
 const pipeSpeed = isMobile ? 1.3 : 3.3;
 const pipeSpacing = isMobile ? 145 : 90;
@@ -119,7 +119,7 @@ function drawStartMenu() {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, 400, 600);
   ctx.font = "16px 'Segoe UI'";
-  const message = isMobile ? "Tap to flap" : "Press spacebar to flap";
+  const message = isMobile ? "Tap to flap" : "Press spacebar or click to start";
   ctx.fillStyle = "#fff";
   ctx.fillText(message, 200 - ctx.measureText(message).width / 2, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
@@ -142,7 +142,6 @@ function handleInput(e) {
   const y = (e.touches?.[0]?.clientY || e.clientY) - rect.top;
 
   if (!gameStarted) {
-    // Check sound button first
     if (x >= 290 && x <= 390 && y >= 10 && y <= 40) {
       soundOn = !soundOn;
       drawStartMenu();
@@ -164,7 +163,7 @@ canvas.addEventListener("click", handleInput);
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();
-  if (!gameStarted && e.code === "Space") {
+  if (!gameStarted) {
     gameStarted = true;
     awaitingFirstFlap = true;
     gameLoop();
