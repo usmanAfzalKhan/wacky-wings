@@ -58,6 +58,7 @@ let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let justFlapped = false;
+let lastTouchTime = 0;
 
 const userAgent = navigator.userAgent || "";
 const isiOS = /iPhone|iPad|iPod/.test(userAgent);
@@ -66,7 +67,7 @@ const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
 
 const pipeSpeed = isMobile ? 1.2 : 3.3;
 const pipeSpacing = isMobile ? 150 : 90;
-const pipeGap = isMobile ? 210 : 165; // Gap reduced slightly
+const pipeGap = isMobile ? 190 : 165; // Gap reduced further
 const jumpStrength = isAndroid || isiOS ? -3.8 : -6.2; // Unified jump for Android and iOS
 
 const birdImg = new Image();
@@ -107,15 +108,16 @@ const bird = {
   angle: 0
 };
 
-// Prevent double tap on iOS
-document.addEventListener("touchstart", (e) => {
-  if (isiOS && justFlapped) {
+// Improved iOS double tap prevention
+canvas.addEventListener("touchstart", (e) => {
+  const now = Date.now();
+  if (isiOS && now - lastTouchTime < 250) {
     e.preventDefault();
     return;
   }
-  justFlapped = true;
-  setTimeout(() => justFlapped = false, 150);
-}, { passive: false });
+  lastTouchTime = now;
+});
+
 
 
 
