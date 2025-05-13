@@ -10,12 +10,31 @@ canvas.width = 400 * scale;
 canvas.height = 600 * scale;
 ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
+let soundOn = true;
+
 const scoreDisplay = document.getElementById("scoreDisplay");
+const soundToggleBtn = document.createElement("button");
+soundToggleBtn.id = "soundToggleBtn";
+soundToggleBtn.textContent = `Sound: ${soundOn ? 'ON' : 'OFF'}`;
+soundToggleBtn.style.marginLeft = '10px';
+soundToggleBtn.style.padding = '4px 10px';
+soundToggleBtn.style.fontWeight = 'bold';
+soundToggleBtn.style.borderRadius = '6px';
+soundToggleBtn.style.border = '2px solid #00ffff';
+soundToggleBtn.style.backgroundColor = '#101020';
+soundToggleBtn.style.color = '#00ffff';
+soundToggleBtn.style.cursor = 'pointer';
+scoreDisplay.appendChild(soundToggleBtn);
+
+soundToggleBtn.addEventListener("click", () => {
+  soundOn = !soundOn;
+  soundToggleBtn.textContent = `Sound: ${soundOn ? 'ON' : 'OFF'}`;
+});
+
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
 let gameStarted = false;
-let soundOn = true;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let justFlapped = false;
@@ -39,7 +58,7 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-const flapSound = !isiOS ? new Audio("audio/flap.mp3") : null;
+const flapSound = !isMobile ? new Audio("audio/flap.mp3") : null;
 if (flapSound) {
   flapSound.volume = 0.35;
   flapSound.playsInline = true;
@@ -139,7 +158,6 @@ function drawStartMenu() {
   ctx.fillStyle = "#fff";
   ctx.fillText(message, canvas.width / scale / 2 - ctx.measureText(message).width / 2, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
-  drawCyberButton(canvas.width / scale - 110, 10, 100, 30, "Sound: " + (soundOn ? "ON" : "OFF"));
 }
 
 function createPipe() {
@@ -273,18 +291,11 @@ canvas.addEventListener("mousedown", (e) => {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  if (!gameStarted) {
-    if (x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-      gameStarted = true;
-      awaitingFirstFlap = false;
-      gameLoop();
-    } else if (x >= canvas.width / scale - 110 && x <= canvas.width / scale - 10 && y >= 10 && y <= 40) {
-      soundOn = !soundOn;
-      setTimeout(() => {
-        if (!gameStarted) drawStartMenu();
-        else if (gameOver) drawFlatlined();
-      }, 10);
-    }
+
+  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    gameStarted = true;
+    awaitingFirstFlap = false;
+    gameLoop();
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
   } else {
@@ -303,9 +314,6 @@ canvas.addEventListener("touchstart", (e) => {
       gameStarted = true;
       awaitingFirstFlap = false;
       gameLoop();
-    } else if (x >= canvas.width / scale - 110 && x <= canvas.width / scale - 10 && y >= 10 && y <= 40) {
-      soundOn = !soundOn;
-      drawStartMenu();
     }
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
