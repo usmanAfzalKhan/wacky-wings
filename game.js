@@ -94,7 +94,7 @@ function flap() {
   }
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
-    bird.velocity = bird.jumpStrength;
+    bird.velocity = bird.jumpStrength * 1.05;
     bird.angle = -30 * (Math.PI / 180);
     if (soundOn && flapSound) {
       flapSound.currentTime = 0;
@@ -280,7 +280,8 @@ canvas.addEventListener("mousedown", (e) => {
       gameLoop();
     } else if (x >= canvas.width / scale - 110 && x <= canvas.width / scale - 10 && y >= 10 && y <= 40) {
       soundOn = !soundOn;
-      drawStartMenu();
+      if (!gameStarted) drawStartMenu();
+      else if (gameOver) drawFlatlined();
     }
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
