@@ -1,7 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Fixed canvas size for all devices
+// Fixed size for all devices
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 
@@ -26,8 +26,9 @@ const isAndroid = /Android/.test(userAgent);
 const isMobile = navigator.userAgentData?.mobile || isiOS || isAndroid;
 
 const pipeSpeed = isMobile ? 1.3 : 3.3;
-const pipeSpacing = isMobile ? 125 : 90;
-const pipeGap = isMobile ? 200 : 165;
+const pipeSpacing = isMobile ? 135 : 90;
+const pipeGap = isMobile ? 220 : 165;
+const jumpStrength = isAndroid ? -3.3 : (isMobile ? -2.95 : -6.2);
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -38,10 +39,13 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-const flapSound = new Audio("audio/flap.mp3");
-flapSound.volume = 0.35;
-flapSound.playsInline = true;
-flapSound.crossOrigin = "anonymous";
+// 🎵 Sounds (flap removed on mobile)
+const flapSound = !isMobile ? new Audio("audio/flap.mp3") : null;
+if (flapSound) {
+  flapSound.volume = 0.35;
+  flapSound.playsInline = true;
+  flapSound.crossOrigin = "anonymous";
+}
 
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
@@ -60,7 +64,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: isMobile ? 0.21 : 0.5,
-  jumpStrength: isMobile ? -2.95 : -6.2,
+  jumpStrength,
   maxVelocity: 8,
   angle: 0
 };
@@ -73,10 +77,12 @@ let bgX = 0;
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [flapSound, deadSound, pointSound].forEach(sound => {
-      try {
-        sound.play().then(() => sound.pause());
-      } catch (_) {}
+    [deadSound, pointSound, flapSound].forEach(sound => {
+      if (sound) {
+        try {
+          sound.play().then(() => sound.pause());
+        } catch (_) {}
+      }
     });
     audioUnlocked = true;
   }
@@ -92,7 +98,7 @@ function flap() {
   } else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
-    if (soundOn) {
+    if (soundOn && flapSound) {
       flapSound.currentTime = 0;
       flapSound.play();
     }
