@@ -1,5 +1,26 @@
 // === Wacky Wings – Unified Game Script (Default for desktop) ===
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+  authDomain: "wacky-wings.firebaseapp.com",
+  projectId: "wacky-wings",
+  storageBucket: "wacky-wings.appspot.com",
+  messagingSenderId: "86787566584",
+  appId: "1:86787566584:web:a4e421c1259763d061c40d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -9,7 +30,6 @@ canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-// === SCORE AND SOUND SETUP ===
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
@@ -129,6 +149,31 @@ function flap() {
   }
 }
 
+function updatePlayerStats(finalScore) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userRef = doc(db, "users", user.uid);
+  getDoc(userRef).then((snap) => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    const prevHigh = data.highscore || 0;
+    const plays = data.timesPlayed || 0;
+    const avg = data.averageScore || 0;
+
+    const newHigh = Math.max(prevHigh, finalScore);
+    const newPlays = plays + 1;
+    const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
+
+    updateDoc(userRef, {
+      highscore: newHigh,
+      timesPlayed: newPlays,
+      averageScore: newAvg
+    });
+  });
+}
+
 function drawBackground() {
   bgX -= pipeSpeed / 2;
   if (bgX <= -canvas.width) bgX = 0;
@@ -229,6 +274,7 @@ function drawFlatlined() {
   ctx.fillText(`Score: ${score}`, 170, 280);
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
+  updatePlayerStats(score);
   if (soundOn) {
     const dead = deadSound.cloneNode(true);
     dead.volume = 0.25;

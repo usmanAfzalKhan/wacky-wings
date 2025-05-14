@@ -1,5 +1,26 @@
 // === Wacky Wings – iOS Optimized Script (Smooth & Balanced Flap) ===
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+  authDomain: "wacky-wings.firebaseapp.com",
+  projectId: "wacky-wings",
+  storageBucket: "wacky-wings.appspot.com",
+  messagingSenderId: "86787566584",
+  appId: "1:86787566584:web:a4e421c1259763d061c40d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -104,55 +125,29 @@ const pipeTileHeight = 60;
 let frameCount = 0;
 let bgX = 0;
 
-canvas.addEventListener("touchstart", (e) => {
-  if (tapCooldown) return;
-  tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 200);
+function updatePlayerStats(finalScore) {
+  const user = auth.currentUser;
+  if (!user) return;
 
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
+  const userRef = doc(db, "users", user.uid);
+  getDoc(userRef).then((snap) => {
+    if (!snap.exists()) return;
 
-  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-    gameStarted = true;
-    awaitingFirstFlap = false;
-    gameLoop();
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    flap();
-  }
-}, { passive: false });
+    const data = snap.data();
+    const prevHigh = data.highscore || 0;
+    const plays = data.timesPlayed || 0;
+    const avg = data.averageScore || 0;
 
-if (!isIOS) {
-  canvas.addEventListener("mousedown", (e) => {
-    unlockAudio();
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const newHigh = Math.max(prevHigh, finalScore);
+    const newPlays = plays + 1;
+    const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
 
-    if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-      gameStarted = true;
-      awaitingFirstFlap = false;
-      gameLoop();
-    } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-      restartGame();
-    } else {
-      flap();
-    }
-  });
-}
-
-function unlockAudio() {
-  if (!audioUnlocked) {
-    [deadSound, pointSound, flapSound].forEach(sound => {
-      try {
-        sound.play().then(() => sound.pause());
-      } catch (_) {}
+    updateDoc(userRef, {
+      highscore: newHigh,
+      timesPlayed: newPlays,
+      averageScore: newAvg
     });
-    audioUnlocked = true;
-  }
+  });
 }
 
 function flap() {
@@ -272,6 +267,7 @@ function drawFlatlined() {
   ctx.fillText(`Score: ${score}`, 170, 280);
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
+  updatePlayerStats(score);
   if (soundOn) {
     const dead = deadSound.cloneNode(true);
     dead.volume = 0.25;
@@ -319,6 +315,27 @@ function gameLoop() {
   frameCount++;
   if (!gameOver) requestAnimationFrame(gameLoop);
 }
+
+canvas.addEventListener("touchstart", (e) => {
+  if (tapCooldown) return;
+  tapCooldown = true;
+  setTimeout(() => tapCooldown = false, 200);
+
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    gameStarted = true;
+    awaitingFirstFlap = false;
+    gameLoop();
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    flap();
+  }
+}, { passive: false });
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();

@@ -1,14 +1,36 @@
-// === Wacky Wings – Balanced Physics for OG Flappy Bird Feel ===
+// === Wacky Wings – Desktop Version ===
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+  authDomain: "wacky-wings.firebaseapp.com",
+  projectId: "wacky-wings",
+  storageBucket: "wacky-wings.appspot.com",
+  messagingSenderId: "86787566584",
+  appId: "1:86787566584:web:a4e421c1259763d061c40d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// === Desktop Game Canvas Setup ===
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
+const ctx = canvas.getContext("2d", { alpha: false });
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+// === Score and Sound ===
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
@@ -53,12 +75,11 @@ let allowRestart = false;
 let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
-let tapCooldown = false;
 
-const jumpStrength = -5.2;
-const pipeSpeed = 1.6;
-const pipeSpacing = 120;
-const pipeGap = 210;
+const pipeSpeed = 3.3;
+const pipeSpacing = 90;
+const pipeGap = 165;
+const jumpStrength = -6.2;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -68,6 +89,11 @@ pipeImg.src = "images/pipe.png";
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
+
+const flapSound = new Audio("audio/flap.mp3");
+flapSound.volume = 0.35;
+flapSound.playsInline = true;
+flapSound.crossOrigin = "anonymous";
 
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
@@ -85,9 +111,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.23,         // Balanced fall rate
-  jumpStrength: -4.8,    // More responsive flap
-  maxVelocity: 5.2,      // Softer terminal velocity
+  gravity: 0.5,
+  jumpStrength,
+  maxVelocity: 8,
   angle: 0
 };
 
@@ -97,30 +123,37 @@ const pipeTileHeight = 60;
 let frameCount = 0;
 let bgX = 0;
 
-canvas.addEventListener("touchstart", (e) => {
-  if (tapCooldown) return;
-  tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 200);
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
+function updatePlayerStats(finalScore) {
+  const user = auth.currentUser;
+  if (!user) return;
 
-  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-    gameStarted = true;
-    awaitingFirstFlap = false;
-    gameLoop();
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    flap();
-  }
-}, { passive: false });
+  const userRef = doc(db, "users", user.uid);
+  getDoc(userRef).then((snap) => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    const prevHigh = data.highscore || 0;
+    const plays = data.timesPlayed || 0;
+    const avg = data.averageScore || 0;
+
+    const newHigh = Math.max(prevHigh, finalScore);
+    const newPlays = plays + 1;
+    const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
+
+    updateDoc(userRef, {
+      highscore: newHigh,
+      timesPlayed: newPlays,
+      averageScore: newAvg
+    });
+  });
+}
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [deadSound, pointSound].forEach(sound => {
-      try { sound.play().then(() => sound.pause()); } catch (_) {}
+    [flapSound, deadSound, pointSound].forEach(sound => {
+      try {
+        sound.play().then(() => sound.pause());
+      } catch (_) {}
     });
     audioUnlocked = true;
   }
@@ -133,8 +166,12 @@ function flap() {
   }
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
-    bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * (Math.PI / 180);
+    bird.velocity = bird.jumpStrength * 1.1;
+    bird.angle = -30 * Math.PI / 180;
+    if (soundOn) {
+      flapSound.currentTime = 0;
+      flapSound.play();
+    }
   }
 }
 
@@ -169,9 +206,9 @@ function drawStartMenu() {
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "16px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Press spacebar or click to start", 80, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
@@ -238,6 +275,7 @@ function drawFlatlined() {
   ctx.fillText(`Score: ${score}`, 170, 280);
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
+  updatePlayerStats(score);
   if (soundOn) {
     const dead = deadSound.cloneNode(true);
     dead.volume = 0.25;
@@ -286,19 +324,6 @@ function gameLoop() {
   if (!gameOver) requestAnimationFrame(gameLoop);
 }
 
-document.addEventListener("keydown", (e) => {
-  unlockAudio();
-  if (e.code === "Space") {
-    if (!gameStarted) {
-      gameStarted = true;
-      awaitingFirstFlap = false;
-      gameLoop();
-    } else {
-      flap();
-    }
-  }
-});
-
 canvas.addEventListener("mousedown", (e) => {
   unlockAudio();
   const rect = canvas.getBoundingClientRect();
@@ -313,6 +338,19 @@ canvas.addEventListener("mousedown", (e) => {
     restartGame();
   } else {
     flap();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  unlockAudio();
+  if (e.code === "Space") {
+    if (!gameStarted) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else {
+      flap();
+    }
   }
 });
 
