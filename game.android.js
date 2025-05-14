@@ -1,4 +1,4 @@
-// === Wacky Wings – Unified Game Script (iOS & Android Aligned to Desktop Gameplay) ===
+// === Wacky Wings – Refined Gameplay for OG Flappy Bird Feel ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -55,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 2.0; // Slowed down
-const pipeSpacing = 90;
-const pipeGap = 165;
-const jumpStrength = -5.0;
+const pipeSpeed = 1.8; // Reduced speed for OG pacing
+const pipeSpacing = 100;
+const pipeGap = 150;
+const jumpStrength = -5.5;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,7 +90,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.42,
+  gravity: 0.45, // Slightly stronger gravity
   jumpStrength,
   maxVelocity: 7,
   angle: 0
@@ -138,7 +138,7 @@ function flap() {
   }
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
-    bird.velocity = bird.jumpStrength * 1.1;
+    bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
     if (soundOn) {
       flapSound.currentTime = 0;
