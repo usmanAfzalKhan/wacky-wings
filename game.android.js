@@ -55,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const jumpStrength = -4.6;
+const jumpStrength = -4.2;
 const pipeSpeed = 1.8;
 const pipeSpacing = 100;
-const pipeGap = 180;
+const pipeGap = 190;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -91,7 +91,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: 0.24, // smoother gravity
-  jumpStrength,
+  jumpStrength: -4.2, // less jump force
   maxVelocity: 6.5, // softer terminal fall speed
   angle: 0
 };
