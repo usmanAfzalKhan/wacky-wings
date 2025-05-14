@@ -77,7 +77,7 @@ let awaitingFirstFlap = false;
 const isAndroid = /Android/i.test(navigator.userAgent);
 const pipeSpeed = isAndroid ? 1.85 : 3.3;
 const pipeSpacing = isAndroid ? 115 : 90;
-const pipeGap = isAndroid ? 185 : 165;
+const pipeGap = isAndroid ? 190 : 165;
 const jumpStrength = isAndroid ? -5.1 : -6.2;
 
 const birdImg = new Image();
