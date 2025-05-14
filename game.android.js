@@ -55,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 2.4;
+const pipeSpeed = 2.0; // Slowed down
 const pipeSpacing = 90;
 const pipeGap = 165;
-const jumpStrength = -6.2;
+const jumpStrength = -5.0;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,9 +90,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.5,
+  gravity: 0.42,
   jumpStrength,
-  maxVelocity: 8,
+  maxVelocity: 7,
   angle: 0
 };
 
@@ -105,8 +105,7 @@ let bgX = 0;
 canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 250);
-
+  setTimeout(() => tapCooldown = false, 200);
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
   const x = touch.clientX - rect.left;
@@ -126,9 +125,7 @@ canvas.addEventListener("touchstart", (e) => {
 function unlockAudio() {
   if (!audioUnlocked) {
     [deadSound, pointSound, flapSound].forEach(sound => {
-      try {
-        sound.play().then(() => sound.pause());
-      } catch (_) {}
+      try { sound.play().then(() => sound.pause()); } catch (_) {}
     });
     audioUnlocked = true;
   }
