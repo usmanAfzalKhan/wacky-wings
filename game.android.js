@@ -69,11 +69,6 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-const flapSound = new Audio("audio/flap.mp3");
-flapSound.volume = 0.35;
-flapSound.playsInline = true;
-flapSound.crossOrigin = "anonymous";
-
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
 deadSound.playsInline = true;
@@ -140,10 +135,6 @@ function flap() {
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
-    if (soundOn) {
-      flapSound.currentTime = 0;
-      flapSound.play();
-    }
   }
 }
 
