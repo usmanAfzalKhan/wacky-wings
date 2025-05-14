@@ -57,7 +57,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.6;
+const pipeSpeed = 2.0;
 const pipeSpacing = 120;
 const pipeGap = 210;
 const jumpStrength = -4.0;
