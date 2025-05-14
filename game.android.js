@@ -75,7 +75,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 
 const pipeSpeed = 1.7;
-const pipeSpacing = 115;
+const pipeSpacing = 125;
 const pipeGap = 200;
 const jumpStrength = -5.0;
 
@@ -104,9 +104,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.21,
+  gravity: 0.20,
   jumpStrength,
-  maxVelocity: 6.6,
+  maxVelocity: 6.4,
   angle: 0
 };
 
