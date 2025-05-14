@@ -74,10 +74,10 @@ let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 
-const pipeSpeed = 1.7;
-const pipeSpacing = 125;
+const pipeSpeed = 1.55;
+const pipeSpacing = 135;
 const pipeGap = 200;
-const jumpStrength = -5.0;
+const jumpStrength = -4.9;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -104,9 +104,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.20,
+  gravity: 0.18,
   jumpStrength,
-  maxVelocity: 6.4,
+  maxVelocity: 6.3,
   angle: 0
 };
 
