@@ -56,10 +56,10 @@ let awaitingFirstFlap = false;
 let justTapped = false;
 let tapCooldown = false;
 
-const pipeSpeed = 3.3;
-const pipeSpacing = 90;
-const pipeGap = 165;
-const jumpStrength = -6.2;
+const pipeSpeed = 1.6;
+const pipeSpacing = 120;
+const pipeGap = 210;
+const jumpStrength = -4.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -91,9 +91,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.5,
-  jumpStrength,
-  maxVelocity: 8,
+  gravity: 0.23,
+  jumpStrength: -4.8,
+  maxVelocity: 5.2,
   angle: 0
 };
 
@@ -144,10 +144,13 @@ function flap() {
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength * 1.1;
     bird.angle = -30 * (Math.PI / 180);
-    if (soundOn) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (soundOn && !isIOS) {
       flapSound.currentTime = 0;
       flapSound.play();
     }
+    
   }
 }
 
