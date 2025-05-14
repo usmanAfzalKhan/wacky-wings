@@ -104,7 +104,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.23,
+  gravity: 0.22,
   jumpStrength,
   maxVelocity: 6.6,
   angle: 0
