@@ -110,7 +110,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isAndroid ? 0.245 : 0.5,
+  gravity: isAndroid ? 0.23 : 0.5,
   jumpStrength,
   maxVelocity: 6.8,
   angle: 0
