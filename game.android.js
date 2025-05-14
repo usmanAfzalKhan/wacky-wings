@@ -1,4 +1,4 @@
-// === Wacky Wings – Refined Gameplay for OG Flappy Bird Feel ===
+// === Wacky Wings – Refined Physics for OG Flappy Bird Feel (Less Bouncy) ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -55,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
+const jumpStrength = -4.6;
 const pipeSpeed = 1.8;
 const pipeSpacing = 100;
 const pipeGap = 150;
-const jumpStrength = -5;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,9 +90,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.35, // Less gravity = less bouncy
+  gravity: 0.28, // smoother gravity
   jumpStrength,
-  maxVelocity: 7,
+  maxVelocity: 6.5, // softer terminal fall speed
   angle: 0
 };
 
