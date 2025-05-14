@@ -142,7 +142,7 @@ function flap() {
   }
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
-    bird.velocity = bird.jumpStrength * 1.1;
+    bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
