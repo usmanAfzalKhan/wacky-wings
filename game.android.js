@@ -1,4 +1,4 @@
-// === Wacky Wings – Unified Game Script (Mobile Android Version Aligned to Desktop Gameplay) ===
+// === Wacky Wings – Unified Game Script (Android Version Aligned to Desktop Gameplay, Adjusted Speed) ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
@@ -55,7 +55,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let lastTouchTime = 0;
 
-const pipeSpeed = 2.8;
+const pipeSpeed = 2.5; // Adjusted from 3.3 to slow down on Android
 const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;
