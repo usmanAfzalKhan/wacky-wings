@@ -1,7 +1,7 @@
 // === Wacky Wings – Unified Game Script (iOS & Android Aligned to Desktop Gameplay) ===
 
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d", { alpha: false });
+const ctx = canvas.getContext("2d"); // Removed alpha: false to fix rendering
 
 canvas.style.width = "400px";
 canvas.style.height = "600px";
