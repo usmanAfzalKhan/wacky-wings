@@ -55,7 +55,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let lastTouchTime = 0;
 
-const pipeSpeed = 3.3;
+const pipeSpeed = 2.8;
 const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;

@@ -58,7 +58,7 @@ let lastTouchTime = 0;
 const pipeSpeed = 3.3;
 const pipeSpacing = 90;
 const pipeGap = 165;
-const jumpStrength = -6.2;
+const jumpStrength = -6.5;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,7 +90,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.5,
+  gravity: 0.55,
   jumpStrength,
   maxVelocity: 8,
   angle: 0
