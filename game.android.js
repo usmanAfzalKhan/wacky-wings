@@ -1,3 +1,5 @@
+// === Wacky Wings – Android Version (Responsive + No Flap Sound) ===
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
@@ -19,7 +21,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// === Desktop Game Canvas Setup ===
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
 canvas.style.width = "400px";
@@ -28,7 +29,6 @@ canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-// === Score and Sound ===
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
@@ -74,11 +74,10 @@ let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 
-const isAndroid = /Android/i.test(navigator.userAgent);
-const pipeSpeed = isAndroid ? 1.85 : 3.3;
-const pipeSpacing = isAndroid ? 115 : 90;
-const pipeGap = isAndroid ? 190 : 165;
-const jumpStrength = isAndroid ? -5.1 : -6.2;
+const pipeSpeed = 1.85;
+const pipeSpacing = 115;
+const pipeGap = 190;
+const jumpStrength = -5.1;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -88,11 +87,6 @@ pipeImg.src = "images/pipe.png";
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
-
-const flapSound = new Audio("audio/flap.mp3");
-flapSound.volume = 0.35;
-flapSound.playsInline = true;
-flapSound.crossOrigin = "anonymous";
 
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
@@ -110,9 +104,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isAndroid ? 0.23 : 0.5,
+  gravity: 0.23,
   jumpStrength,
-  maxVelocity: 6.8,
+  maxVelocity: 6.6,
   angle: 0
 };
 
@@ -125,20 +119,16 @@ let bgX = 0;
 function updatePlayerStats(finalScore) {
   const user = auth.currentUser;
   if (!user) return;
-
   const userRef = doc(db, "users", user.uid);
   getDoc(userRef).then((snap) => {
     if (!snap.exists()) return;
-
     const data = snap.data();
     const prevHigh = data.highscore || 0;
     const plays = data.timesPlayed || 0;
     const avg = data.averageScore || 0;
-
     const newHigh = Math.max(prevHigh, finalScore);
     const newPlays = plays + 1;
     const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-
     updateDoc(userRef, {
       highscore: newHigh,
       timesPlayed: newPlays,
@@ -149,10 +139,8 @@ function updatePlayerStats(finalScore) {
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [flapSound, deadSound, pointSound].forEach(sound => {
-      try {
-        sound.play().then(() => sound.pause());
-      } catch (_) {}
+    [deadSound, pointSound].forEach(sound => {
+      try { sound.play().then(() => sound.pause()); } catch (_) {}
     });
     audioUnlocked = true;
   }
@@ -167,10 +155,6 @@ function flap() {
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
     bird.angle = -30 * Math.PI / 180;
-    if (soundOn) {
-      flapSound.currentTime = 0;
-      flapSound.play();
-    }
   }
 }
 
@@ -205,8 +189,8 @@ function drawStartMenu() {
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
   ctx.font = "16px 'Segoe UI'";
+  ctx.fillStyle = "#fff";
   ctx.fillText("Press spacebar or click to start", 80, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
