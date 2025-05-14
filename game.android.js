@@ -76,10 +76,11 @@ let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 
-const pipeSpeed = 2.4;
-const pipeSpacing = 110;
-const pipeGap = 190;
-const jumpStrength = -5.4;
+const isAndroid = /Android/i.test(navigator.userAgent);
+const pipeSpeed = isAndroid ? 2.4 : 3.3;
+const pipeSpacing = isAndroid ? 110 : 90;
+const pipeGap = isAndroid ? 190 : 165;
+const jumpStrength = isAndroid ? -5.4 : -6.2;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -111,7 +112,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.38,
+  gravity: isAndroid ? 0.38 : 0.5,
   jumpStrength,
   maxVelocity: 8,
   angle: 0
@@ -166,7 +167,7 @@ function flap() {
   }
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
-    bird.velocity = bird.jumpStrength * 1.1;
+    bird.velocity = bird.jumpStrength;
     bird.angle = -30 * Math.PI / 180;
     if (soundOn) {
       flapSound.currentTime = 0;
