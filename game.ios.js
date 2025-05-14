@@ -92,7 +92,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: 0.23,
-  jumpStrength: -4.8,
+  jumpStrength: -4.4,
   maxVelocity: 5.2,
   angle: 0
 };
