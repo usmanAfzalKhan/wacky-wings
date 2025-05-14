@@ -1,7 +1,7 @@
 // === Wacky Wings – Unified Game Script (iOS & Android Aligned to Desktop Gameplay) ===
 
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d"); // Removed alpha: false to fix rendering
+const ctx = canvas.getContext("2d");
 
 canvas.style.width = "400px";
 canvas.style.height = "600px";
@@ -56,7 +56,7 @@ let awaitingFirstFlap = false;
 let justTapped = false;
 let tapCooldown = false;
 
-const pipeSpeed = 2.3;
+const pipeSpeed = 3.3;
 const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;
