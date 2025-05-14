@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Optimized Version ===
+// === Wacky Wings – iOS Version (Unified with Desktop Gameplay) ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
@@ -9,7 +9,6 @@ canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-// === SCORE AND SOUND SETUP ===
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
@@ -48,7 +47,6 @@ soundBox.addEventListener("click", () => {
   soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
 });
 
-// === GAME STATE VARIABLES ===
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
@@ -57,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let lastTouchTime = 0;
 
-const pipeSpeed = 1.2;
-const pipeSpacing = 150;
-const pipeGap = 190;
-const jumpStrength = -3.8;
+const pipeSpeed = 3.3;
+const pipeSpacing = 90;
+const pipeGap = 165;
+const jumpStrength = -6.2;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -70,6 +68,11 @@ pipeImg.src = "images/pipe.png";
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
+
+const flapSound = new Audio("audio/flap.mp3");
+flapSound.volume = 0.35;
+flapSound.playsInline = true;
+flapSound.crossOrigin = "anonymous";
 
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
@@ -82,16 +85,36 @@ pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
 const bird = {
-  width: 30,
-  height: 30,
+  width: 40,
+  height: 40,
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.22,
+  gravity: 0.5,
   jumpStrength,
   maxVelocity: 8,
   angle: 0
 };
+
+canvas.addEventListener("touchstart", (e) => {
+  const now = Date.now();
+  if (now - lastTouchTime < 300) return;
+  lastTouchTime = now;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+    gameStarted = true;
+    awaitingFirstFlap = false;
+    gameLoop();
+  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+    restartGame();
+  } else {
+    flap();
+  }
+}, { passive: false });
 
 const pipes = [];
 const pipeWidth = 60;
@@ -101,7 +124,7 @@ let bgX = 0;
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [deadSound, pointSound].forEach(sound => {
+    [deadSound, pointSound, flapSound].forEach(sound => {
       try {
         sound.play().then(() => sound.pause());
       } catch (_) {}
@@ -118,7 +141,11 @@ function flap() {
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength * 1.1;
-    bird.angle = -30 * Math.PI / 180;
+    bird.angle = -30 * (Math.PI / 180);
+    if (soundOn) {
+      flapSound.currentTime = 0;
+      flapSound.play();
+    }
   }
 }
 
@@ -153,9 +180,9 @@ function drawStartMenu() {
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
   ctx.font = "16px 'Segoe UI'";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 40, 230);
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
@@ -283,14 +310,11 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-canvas.addEventListener("touchstart", (e) => {
-  const now = Date.now();
-  if (now - lastTouchTime < 350) return;
-  lastTouchTime = now;
+canvas.addEventListener("mousedown", (e) => {
+  unlockAudio();
   const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
 
   if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
     gameStarted = true;
@@ -301,6 +325,6 @@ canvas.addEventListener("touchstart", (e) => {
   } else {
     flap();
   }
-}, { passive: false });
+});
 
 bgImg.onload = () => drawStartMenu();
