@@ -127,16 +127,17 @@ function unlockAudio() {
 }
 
 function flap() {
-  if (!gameStarted || awaitingFirstFlap) {
-    awaitingFirstFlap = false;
-    return;
+    if (!gameStarted || awaitingFirstFlap) {
+      awaitingFirstFlap = false;
+      return;
+    }
+    if (gameOver && allowRestart) restartGame();
+    else if (!gameOver) {
+      bird.velocity = bird.jumpStrength;
+      bird.angle = -30 * (Math.PI / 180);
+    }
   }
-  if (gameOver && allowRestart) restartGame();
-  else if (!gameOver) {
-    bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * (Math.PI / 180);
-  }
-}
+  
 
 function drawBackground() {
   bgX -= pipeSpeed / 2;
