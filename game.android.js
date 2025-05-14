@@ -1,5 +1,3 @@
-// === Wacky Wings – Desktop Version ===
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
@@ -112,9 +110,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isAndroid ? 0.38 : 0.5,
+  gravity: isAndroid ? 0.3 : 0.5,
   jumpStrength,
-  maxVelocity: 8,
+  maxVelocity: 7.2,
   angle: 0
 };
 
