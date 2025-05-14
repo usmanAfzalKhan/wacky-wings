@@ -1,4 +1,4 @@
-// === Wacky Wings – Unified Game Script (iOS & Android Aligned to Desktop Gameplay) ===
+// === Wacky Wings – iOS Optimized Script (Smooth & Balanced Flap) ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -8,6 +8,8 @@ canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
@@ -53,13 +55,12 @@ let allowRestart = false;
 let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
-let justTapped = false;
 let tapCooldown = false;
 
 const pipeSpeed = 1.6;
 const pipeSpacing = 120;
 const pipeGap = 210;
-const jumpStrength = -3.0;
+const jumpStrength = -2.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -92,7 +93,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: 0.23,
-  jumpStrength: -3.2,
+  jumpStrength,
   maxVelocity: 5.2,
   angle: 0
 };
@@ -124,6 +125,25 @@ canvas.addEventListener("touchstart", (e) => {
   }
 }, { passive: false });
 
+if (!isIOS) {
+  canvas.addEventListener("mousedown", (e) => {
+    unlockAudio();
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+      restartGame();
+    } else {
+      flap();
+    }
+  });
+}
+
 function unlockAudio() {
   if (!audioUnlocked) {
     [deadSound, pointSound, flapSound].forEach(sound => {
@@ -140,17 +160,15 @@ function flap() {
     awaitingFirstFlap = false;
     return;
   }
-  if (gameOver && allowRestart) restartGame();
-  else if (!gameOver) {
+  if (gameOver && allowRestart) {
+    restartGame();
+  } else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
     bird.angle = -30 * (Math.PI / 180);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
     if (soundOn && !isIOS) {
       flapSound.currentTime = 0;
       flapSound.play();
     }
-    
   }
 }
 
@@ -312,23 +330,6 @@ document.addEventListener("keydown", (e) => {
     } else {
       flap();
     }
-  }
-});
-
-canvas.addEventListener("mousedown", (e) => {
-  unlockAudio();
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
-    gameStarted = true;
-    awaitingFirstFlap = false;
-    gameLoop();
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    flap();
   }
 });
 
