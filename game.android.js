@@ -55,10 +55,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.8; // Reduced speed for OG pacing
+const pipeSpeed = 1.8;
 const pipeSpacing = 100;
 const pipeGap = 150;
-const jumpStrength = -5.5;
+const jumpStrength = -5;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,7 +90,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.45, // Slightly stronger gravity
+  gravity: 0.35, // Less gravity = less bouncy
   jumpStrength,
   maxVelocity: 7,
   angle: 0
