@@ -53,10 +53,9 @@ let allowRestart = false;
 let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
-let justTapped = false;
 let tapCooldown = false;
 
-const pipeSpeed = 3.3;
+const pipeSpeed = 2.4;
 const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;
@@ -106,7 +105,7 @@ let bgX = 0;
 canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 200);
+  setTimeout(() => tapCooldown = false, 250);
 
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
