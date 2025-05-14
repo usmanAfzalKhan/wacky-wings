@@ -1,4 +1,4 @@
-// === Wacky Wings – Refined Physics for OG Flappy Bird Feel (Less Bouncy) ===
+// === Wacky Wings – Balanced Physics for OG Flappy Bird Feel ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -55,7 +55,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const jumpStrength = -4.0;
+const jumpStrength = -5.2;
 const pipeSpeed = 1.6;
 const pipeSpacing = 120;
 const pipeGap = 190;
@@ -85,9 +85,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.15, // smoother gravity
-  jumpStrength: -4.0, // less jump force
-  maxVelocity: 5.5, // softer terminal fall speed
+  gravity: 0.23,         // Balanced fall rate
+  jumpStrength: -5.2,    // More responsive flap
+  maxVelocity: 5.2,      // Softer terminal velocity
   angle: 0
 };
 
@@ -119,7 +119,7 @@ canvas.addEventListener("touchstart", (e) => {
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [deadSound, pointSound, flapSound].forEach(sound => {
+    [deadSound, pointSound].forEach(sound => {
       try { sound.play().then(() => sound.pause()); } catch (_) {}
     });
     audioUnlocked = true;
@@ -127,17 +127,16 @@ function unlockAudio() {
 }
 
 function flap() {
-    if (!gameStarted || awaitingFirstFlap) {
-      awaitingFirstFlap = false;
-      return;
-    }
-    if (gameOver && allowRestart) restartGame();
-    else if (!gameOver) {
-      bird.velocity = bird.jumpStrength;
-      bird.angle = -30 * (Math.PI / 180);
-    }
+  if (!gameStarted || awaitingFirstFlap) {
+    awaitingFirstFlap = false;
+    return;
   }
-  
+  if (gameOver && allowRestart) restartGame();
+  else if (!gameOver) {
+    bird.velocity = bird.jumpStrength;
+    bird.angle = -30 * (Math.PI / 180);
+  }
+}
 
 function drawBackground() {
   bgX -= pipeSpeed / 2;
