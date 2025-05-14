@@ -58,7 +58,7 @@ let tapCooldown = false;
 const jumpStrength = -5.2;
 const pipeSpeed = 1.6;
 const pipeSpacing = 120;
-const pipeGap = 200;
+const pipeGap = 210;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
