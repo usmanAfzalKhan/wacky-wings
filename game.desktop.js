@@ -1,4 +1,4 @@
-// === Wacky Wings – Unified Game Script (Default for desktop) ===
+// === Wacky Wings – Desktop Version ===
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
@@ -48,6 +48,7 @@ soundBox.addEventListener("click", () => {
   soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
 });
 
+// === GAME STATE VARIABLES ===
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
@@ -104,7 +105,7 @@ let bgX = 0;
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [deadSound, pointSound, flapSound].forEach(sound => {
+    [flapSound, deadSound, pointSound].forEach(sound => {
       try {
         sound.play().then(() => sound.pause());
       } catch (_) {}
@@ -121,7 +122,7 @@ function flap() {
   if (gameOver && allowRestart) restartGame();
   else if (!gameOver) {
     bird.velocity = bird.jumpStrength * 1.1;
-    bird.angle = -30 * (Math.PI / 180);
+    bird.angle = -30 * Math.PI / 180;
     if (soundOn) {
       flapSound.currentTime = 0;
       flapSound.play();
@@ -160,9 +161,9 @@ function drawStartMenu() {
   drawBird();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "16px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Press spacebar or click to start", canvas.width / 2 - 100, 230);
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Press spacebar or click to start", 80, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 

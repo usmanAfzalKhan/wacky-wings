@@ -203,6 +203,21 @@
     });
   </script>
 
-  <script type="module" src="game.js"></script>
+<script type="module">
+  const userAgent = navigator.userAgent || '';
+  const script = document.createElement('script');
+
+  if (/iPhone|iPad|iPod/.test(userAgent)) {
+    script.src = 'game.ios.js';
+  } else if (/Android/.test(userAgent)) {
+    script.src = 'game.android.js';
+  } else {
+    script.src = 'game.desktop.js';
+  }
+
+  script.type = 'module';
+  document.body.appendChild(script);
+</script>
+
 </body>
 </html>
