@@ -86,7 +86,7 @@ const bird = {
   y: 200,
   velocity: 0,
   gravity: 0.23,         // Balanced fall rate
-  jumpStrength: -5.2,    // More responsive flap
+  jumpStrength: -4.8,    // More responsive flap
   maxVelocity: 5.2,      // Softer terminal velocity
   angle: 0
 };
