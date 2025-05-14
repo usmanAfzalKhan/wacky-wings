@@ -75,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 
 const isAndroid = /Android/i.test(navigator.userAgent);
-const pipeSpeed = isAndroid ? 1.95 : 3.3;
+const pipeSpeed = isAndroid ? 1.85 : 3.3;
 const pipeSpacing = isAndroid ? 115 : 90;
 const pipeGap = isAndroid ? 185 : 165;
-const jumpStrength = isAndroid ? -5.2 : -6.2;
+const jumpStrength = isAndroid ? -5.1 : -6.2;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -110,7 +110,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: isAndroid ? 0.26 : 0.5,
+  gravity: isAndroid ? 0.245 : 0.5,
   jumpStrength,
   maxVelocity: 6.8,
   angle: 0
