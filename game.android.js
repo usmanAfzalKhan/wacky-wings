@@ -55,7 +55,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let lastTouchTime = 0;
 
-const pipeSpeed = 2.5; // Adjusted from 3.3 to slow down on Android
+const pipeSpeed = 1.9; // Further reduced speed for Android
 const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;
@@ -115,6 +115,9 @@ canvas.addEventListener("touchstart", (e) => {
     flap();
   }
 }, { passive: false });
+
+// ... [rest of the code remains unchanged] ...
+
 
 const pipes = [];
 const pipeWidth = 60;
