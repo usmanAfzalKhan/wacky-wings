@@ -85,7 +85,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.19, // smoother gravity
+  gravity: 0.15, // smoother gravity
   jumpStrength: -4.0, // less jump force
   maxVelocity: 5.5, // softer terminal fall speed
   angle: 0
