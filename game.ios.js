@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Optimized Script (Smooth & Balanced Flap) ===
+// === Wacky Wings – iOS Version (Balanced & Responsive) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -22,15 +22,12 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
+const ctx = canvas.getContext("2d", { alpha: false });
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
@@ -78,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 2.0;
-const pipeSpacing = 120;
+const pipeSpeed = 1.6;
+const pipeSpacing = 150;
 const pipeGap = 210;
-const jumpStrength = -4.0;
+const jumpStrength = -4.3;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -91,11 +88,6 @@ pipeImg.src = "images/pipe.png";
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
-
-const flapSound = new Audio("audio/flap.mp3");
-flapSound.volume = 0.35;
-flapSound.playsInline = true;
-flapSound.crossOrigin = "anonymous";
 
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.25;
@@ -113,9 +105,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.23,
+  gravity: 0.19,
   jumpStrength,
-  maxVelocity: 5.2,
+  maxVelocity: 6.0,
   angle: 0
 };
 
@@ -128,20 +120,16 @@ let bgX = 0;
 function updatePlayerStats(finalScore) {
   const user = auth.currentUser;
   if (!user) return;
-
   const userRef = doc(db, "users", user.uid);
   getDoc(userRef).then((snap) => {
     if (!snap.exists()) return;
-
     const data = snap.data();
     const prevHigh = data.highscore || 0;
     const plays = data.timesPlayed || 0;
     const avg = data.averageScore || 0;
-
     const newHigh = Math.max(prevHigh, finalScore);
     const newPlays = plays + 1;
     const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-
     updateDoc(userRef, {
       highscore: newHigh,
       timesPlayed: newPlays,
@@ -150,20 +138,24 @@ function updatePlayerStats(finalScore) {
   });
 }
 
+function unlockAudio() {
+  if (!audioUnlocked) {
+    [deadSound, pointSound].forEach(sound => {
+      try { sound.play().then(() => sound.pause()); } catch (_) {}
+    });
+    audioUnlocked = true;
+  }
+}
+
 function flap() {
   if (!gameStarted || awaitingFirstFlap) {
     awaitingFirstFlap = false;
     return;
   }
-  if (gameOver && allowRestart) {
-    restartGame();
-  } else if (!gameOver) {
+  if (gameOver && allowRestart) restartGame();
+  else if (!gameOver) {
     bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * (Math.PI / 180);
-    if (soundOn && !isIOS) {
-      flapSound.currentTime = 0;
-      flapSound.play();
-    }
+    bird.angle = -30 * Math.PI / 180;
   }
 }
 
@@ -200,7 +192,7 @@ function drawStartMenu() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.font = "16px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
+  ctx.fillText("Press spacebar or click to start", 80, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
@@ -320,12 +312,10 @@ canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
   setTimeout(() => tapCooldown = false, 200);
-
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
-
   if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
     gameStarted = true;
     awaitingFirstFlap = false;
