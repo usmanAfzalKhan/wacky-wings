@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Version (Balanced & Responsive) ===
+// === Wacky Wings – iOS Version (Balanced & Fast) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -75,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.6;
-const pipeSpacing = 150;
+const pipeSpeed = 2.2;
+const pipeSpacing = 135;
 const pipeGap = 210;
-const jumpStrength = -4.3;
+const jumpStrength = -3.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -105,7 +105,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.19,
+  gravity: 0.17,
   jumpStrength,
   maxVelocity: 6.0,
   angle: 0
@@ -192,7 +192,7 @@ function drawStartMenu() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.font = "16px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText("Press spacebar or click to start", 80, 230);
+  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
   drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
