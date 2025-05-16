@@ -24,7 +24,7 @@ const ctx = canvas.getContext("2d", { alpha: false });
 canvas.width = 320;
 canvas.height = 480;
 ctx.imageSmoothingEnabled = false;
-canvas.style.marginTop = "50px";
+canvas.style.marginTop = "10px";
 canvas.style.display = "block";
 
 let soundOn = true;
