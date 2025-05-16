@@ -26,6 +26,7 @@ canvas.height = 480;
 ctx.imageSmoothingEnabled = false;
 canvas.style.margin = "10px auto 60px auto";
 canvas.style.display = "block";
+document.body.style.overflowY = "scroll";
 
 let soundOn = true;
 const pointSound = new Audio("audio/point.mp3");
