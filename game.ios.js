@@ -1,8 +1,8 @@
-// === Wacky Wings – iOS Final Performance Version (Canvas Score, No DOM Lag) ===
+// === Wacky Wings – iOS Optimized (Header-Friendly, Lag Reduced) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, updateDoc
+  getFirestore, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
@@ -32,8 +32,11 @@ pointSound.volume = 0.35;
 pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
-let bgLoaded = false;
 const bgImg = new Image();
+const birdImg = new Image();
+const pipeImg = new Image();
+
+let bgLoaded = false;
 bgImg.src = "images/background.webp";
 bgImg.onload = () => { bgLoaded = true; drawStartMenu(); };
 bgImg.onerror = () => {
@@ -41,10 +44,7 @@ bgImg.onerror = () => {
   bgImg.onload = () => { bgLoaded = true; drawStartMenu(); };
 };
 
-const birdImg = new Image();
 birdImg.src = "images/bird.png";
-
-const pipeImg = new Image();
 pipeImg.src = "images/pipe.png";
 
 let score = 0;
@@ -114,6 +114,12 @@ function drawBird() {
   ctx.restore();
 }
 
+function drawCanvasScore() {
+  ctx.font = "bold 20px 'Segoe UI'";
+  ctx.fillStyle = "white";
+  ctx.fillText(`Score: ${score}`, 12, 30);
+}
+
 function drawCyberButton(x, y, w, h, label) {
   ctx.fillStyle = "#00ffff";
   ctx.strokeStyle = "#ff00ff";
@@ -125,12 +131,6 @@ function drawCyberButton(x, y, w, h, label) {
   ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
 }
 
-function drawCanvasScore() {
-  ctx.font = "bold 20px 'Segoe UI'";
-  ctx.fillStyle = "white";
-  ctx.fillText(`Score: ${score}`, 12, 30);
-}
-
 function drawStartMenu() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
@@ -140,7 +140,7 @@ function drawStartMenu() {
   ctx.fillStyle = "#fff";
   ctx.font = "16px 'Segoe UI'";
   ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
-  drawCyberButton(100, 250, 120, 40, "START GAME");
+  drawCyberButton(80, 250, 160, 40, "START GAME");
 }
 
 function createPipe() {
@@ -224,7 +224,7 @@ function gameTick() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
   updateBird();
-  updatePipes();
+  if (frameCount % 2 === 0) updatePipes(); // Reduced pipe update rate
   drawPipes();
   drawBird();
   drawCanvasScore();
@@ -249,29 +249,19 @@ function restartGame() {
 }
 
 canvas.addEventListener("touchstart", (e) => {
-    if (tapCooldown) return;
-    tapCooldown = true;
-    setTimeout(() => tapCooldown = false, 150);
-  
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-  
-    // Log tap for debugging
-    console.log("Tap at", x, y);
-  
-    if (!gameStarted) {
-      gameStarted = true;
-      awaitingFirstFlap = false;
-      intervalId = setInterval(gameTick, 1000 / 60);
-    } else if (gameOver && allowRestart) {
-      restartGame();
-    } else {
-      flap();
-    }
-  }, { passive: false });
-  
+  if (tapCooldown) return;
+  tapCooldown = true;
+  setTimeout(() => tapCooldown = false, 150);
+  if (!gameStarted) {
+    gameStarted = true;
+    awaitingFirstFlap = false;
+    intervalId = setInterval(gameTick, 1000 / 60);
+  } else if (gameOver && allowRestart) {
+    restartGame();
+  } else {
+    flap();
+  }
+}, { passive: false });
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();
