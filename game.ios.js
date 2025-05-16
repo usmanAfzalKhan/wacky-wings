@@ -1,5 +1,3 @@
-// === Wacky Wings – iOS Version (Final Lean Build – Only Point Sound) ===
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
@@ -23,14 +21,17 @@ const auth = getAuth(app);
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
-canvas.style.width = "400px";
-canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 ctx.imageSmoothingEnabled = false;
 
 let soundOn = true;
+const pointSound = new Audio("audio/point.mp3");
+pointSound.volume = 0.35;
+pointSound.playsInline = true;
+pointSound.crossOrigin = "anonymous";
+
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
   scoreDisplay = document.createElement("div");
@@ -47,27 +48,6 @@ if (!scoreDisplay) {
   document.body.appendChild(scoreDisplay);
 }
 
-const soundBox = document.createElement("div");
-soundBox.style.display = "inline-block";
-soundBox.style.marginLeft = "10px";
-soundBox.style.backgroundColor = "#101020";
-soundBox.style.border = "2px solid #00ffff";
-soundBox.style.padding = "6px 12px";
-soundBox.style.borderRadius = "10px";
-soundBox.style.color = "#00ffff";
-soundBox.style.fontWeight = "bold";
-soundBox.style.fontFamily = "Segoe UI, sans-serif";
-soundBox.style.userSelect = "none";
-soundBox.style.cursor = "pointer";
-soundBox.style.verticalAlign = "middle";
-soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
-scoreDisplay.after(soundBox);
-
-soundBox.addEventListener("click", () => {
-  soundOn = !soundOn;
-  soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
-});
-
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
@@ -83,18 +63,10 @@ const jumpStrength = -4.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
-
 const pipeImg = new Image();
 pipeImg.src = "images/pipe.png";
-
 const bgImg = new Image();
-bgImg.src = "images/background.png";
-
-// ✅ Only sound kept
-const pointSound = new Audio("audio/point.mp3");
-pointSound.volume = 0.35;
-pointSound.playsInline = true;
-pointSound.crossOrigin = "anonymous";
+bgImg.src = "images/background.webp";
 
 const bird = {
   width: 40,
@@ -113,27 +85,6 @@ const pipeWidth = 60;
 const pipeTileHeight = 60;
 let frameCount = 0;
 let bgX = 0;
-
-function updatePlayerStats(finalScore) {
-  const user = auth.currentUser;
-  if (!user) return;
-  const userRef = doc(db, "users", user.uid);
-  getDoc(userRef).then((snap) => {
-    if (!snap.exists()) return;
-    const data = snap.data();
-    const prevHigh = data.highscore || 0;
-    const plays = data.timesPlayed || 0;
-    const avg = data.averageScore || 0;
-    const newHigh = Math.max(prevHigh, finalScore);
-    const newPlays = plays + 1;
-    const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-    updateDoc(userRef, {
-      highscore: newHigh,
-      timesPlayed: newPlays,
-      averageScore: newAvg
-    });
-  });
-}
 
 function unlockAudio() {
   if (!audioUnlocked) {
@@ -167,28 +118,6 @@ function drawBird() {
   ctx.rotate(bird.angle);
   ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
   ctx.restore();
-}
-
-function drawCyberButton(x, y, w, h, label) {
-  ctx.fillStyle = "#00ffff";
-  ctx.strokeStyle = "#ff00ff";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
-  ctx.fillRect(x, y, w, h);
-  ctx.font = "bold 14px 'Segoe UI'";
-  ctx.fillStyle = "#000";
-  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
-}
-
-function drawStartMenu() {
-  drawBackground();
-  drawBird();
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "16px 'Segoe UI'";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
-  drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
 function createPipe() {
@@ -252,9 +181,7 @@ function drawFlatlined() {
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
   ctx.fillText(`Score: ${score}`, 170, 280);
-  drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
-  updatePlayerStats(score);
 }
 
 function updateBird() {
@@ -279,22 +206,30 @@ function restartGame() {
   bird.angle = 0;
   frameCount = 0;
   scoreDisplay.textContent = "Score: 0";
-  gameLoop();
+  requestAnimationFrame(gameLoop);
 }
 
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBackground();
-  updateBird();
-  updatePipes();
-  drawPipes();
-  drawBird();
-  if (!gameOver && checkCollision()) {
-    gameOver = true;
-    drawFlatlined();
-    return;
+let lastTime = 0;
+const timestep = 1000 / 60;
+
+function gameLoop(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const delta = timestamp - lastTime;
+  if (delta >= timestep) {
+    lastTime = timestamp;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    updateBird();
+    updatePipes();
+    drawPipes();
+    drawBird();
+    if (!gameOver && checkCollision()) {
+      gameOver = true;
+      drawFlatlined();
+      return;
+    }
+    frameCount++;
   }
-  frameCount++;
   if (!gameOver) requestAnimationFrame(gameLoop);
 }
 
@@ -302,16 +237,14 @@ canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
   setTimeout(() => tapCooldown = false, 150);
-
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
-
   if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
     gameStarted = true;
     awaitingFirstFlap = false;
-    gameLoop();
+    requestAnimationFrame(gameLoop);
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
   } else {
@@ -325,11 +258,20 @@ document.addEventListener("keydown", (e) => {
     if (!gameStarted) {
       gameStarted = true;
       awaitingFirstFlap = false;
-      gameLoop();
+      requestAnimationFrame(gameLoop);
     } else {
       flap();
     }
   }
 });
 
-bgImg.onload = () => drawStartMenu();
+bgImg.onload = () => {
+  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
+  drawCyberButton(140, 250, 120, 40, "START GAME");
+};
