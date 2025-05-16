@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Version (Matched to Android Behavior – Gravity, Pipes, Timing Synced) ===
+// === Wacky Wings – iOS Version (Matched to Android Behavior – Responsive & Speed Synced) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -75,7 +75,7 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.45;
+const pipeSpeed = 1.65; // adjusted for iOS to match Android feel
 const pipeSpacing = 145;
 const pipeGap = 215;
 const jumpStrength = -4.6;
@@ -160,7 +160,7 @@ function flap() {
 }
 
 function drawBackground() {
-  bgX -= pipeSpeed / 2;
+  bgX -= pipeSpeed / 2.3; // slightly slower background scroll to sync visual flow
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
   ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
@@ -305,14 +305,17 @@ function gameLoop() {
     return;
   }
   frameCount++;
-  if (!gameOver) requestAnimationFrame(gameLoop);
+  setTimeout(() => {
+    if (!gameOver) requestAnimationFrame(gameLoop);
+  }, 1000 / 60); // cap to 60 FPS
+  return;
 }
 
-// ✅ iOS tap handler with Android-like cooldown response
+// ✅ Tap handling - now more responsive like Android
 canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 150); // was 200, now tighter response
+  setTimeout(() => tapCooldown = false, 150); // tighter response
 
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
