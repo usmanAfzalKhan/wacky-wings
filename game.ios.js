@@ -116,6 +116,8 @@ function updatePipes() {
     if (passedMid) {
       pipe.passed = true;
       score++;
+      const scoreEl = document.getElementById("scoreDisplay");
+      if (scoreEl) scoreEl.textContent = `Score: ${score}`;
       if (soundOn) pointSound.cloneNode(true).play();
     }
   });
