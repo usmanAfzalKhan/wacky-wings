@@ -1,12 +1,11 @@
-
-// === Wacky Wings – Final iOS Optimized (with Background Fallback) ===
+// === Wacky Wings – Ultra Optimized (iOS Fast Mode – setInterval Based) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import {
-  getAuth, onAuthStateChanged
+  getAuth
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -35,6 +34,21 @@ pointSound.volume = 0.35;
 pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
+let bgLoaded = false;
+const bgImg = new Image();
+bgImg.src = "images/background.webp";
+bgImg.onload = () => { bgLoaded = true; drawStartMenu(); };
+bgImg.onerror = () => {
+  bgImg.src = "images/background.png";
+  bgImg.onload = () => { bgLoaded = true; drawStartMenu(); };
+};
+
+const birdImg = new Image();
+birdImg.src = "images/bird.png";
+
+const pipeImg = new Image();
+pipeImg.src = "images/pipe.png";
+
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
   scoreDisplay = document.createElement("div");
@@ -58,33 +72,12 @@ let gameStarted = false;
 let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
+let intervalId = null;
 
 const pipeSpeed = 1.75;
 const pipeSpacing = 145;
 const pipeGap = 215;
 const jumpStrength = -4.8;
-
-const birdImg = new Image();
-birdImg.src = "images/bird.png";
-
-const pipeImg = new Image();
-pipeImg.src = "images/pipe.png";
-
-// Background with fallback
-let bgLoaded = false;
-const bgImg = new Image();
-bgImg.src = "images/background.webp";
-bgImg.onload = () => {
-  bgLoaded = true;
-  drawStartMenu();
-};
-bgImg.onerror = () => {
-  bgImg.src = "images/background.png";
-  bgImg.onload = () => {
-    bgLoaded = true;
-    drawStartMenu();
-  };
-};
 
 const bird = {
   width: 40,
@@ -137,6 +130,29 @@ function drawBird() {
   ctx.rotate(bird.angle);
   ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
   ctx.restore();
+}
+
+function drawCyberButton(x, y, w, h, label) {
+  ctx.fillStyle = "#00ffff";
+  ctx.strokeStyle = "#ff00ff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, w, h);
+  ctx.font = "bold 14px 'Segoe UI'";
+  ctx.fillStyle = "#000";
+  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
+}
+
+function drawStartMenu() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
+  drawCyberButton(140, 250, 120, 40, "START GAME");
 }
 
 function createPipe() {
@@ -211,8 +227,25 @@ function updateBird() {
   if (bird.y + bird.height >= canvas.height) {
     gameOver = true;
     drawFlatlined();
+    clearInterval(intervalId);
   }
   if (bird.y < 0) bird.y = 0;
+}
+
+function gameTick() {
+  if (gameOver) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  updateBird();
+  updatePipes();
+  drawPipes();
+  drawBird();
+  if (!gameOver && checkCollision()) {
+    gameOver = true;
+    drawFlatlined();
+    clearInterval(intervalId);
+  }
+  frameCount++;
 }
 
 function restartGame() {
@@ -225,54 +258,7 @@ function restartGame() {
   bird.angle = 0;
   frameCount = 0;
   scoreDisplay.textContent = "Score: 0";
-  requestAnimationFrame(gameLoop);
-}
-
-let lastTime = 0;
-const timestep = 1000 / 60;
-
-function gameLoop(timestamp) {
-  if (!lastTime) lastTime = timestamp;
-  const delta = timestamp - lastTime;
-  if (delta >= timestep) {
-    lastTime = timestamp;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground();
-    updateBird();
-    updatePipes();
-    drawPipes();
-    drawBird();
-    if (!gameOver && checkCollision()) {
-      gameOver = true;
-      drawFlatlined();
-      return;
-    }
-    frameCount++;
-  }
-  if (!gameOver) requestAnimationFrame(gameLoop);
-}
-
-function drawCyberButton(x, y, w, h, label) {
-  ctx.fillStyle = "#00ffff";
-  ctx.strokeStyle = "#ff00ff";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
-  ctx.fillRect(x, y, w, h);
-  ctx.font = "bold 14px 'Segoe UI'";
-  ctx.fillStyle = "#000";
-  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
-}
-
-function drawStartMenu() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBackground();
-  drawBird();
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
-  ctx.font = "16px 'Segoe UI'";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
-  drawCyberButton(140, 250, 120, 40, "START GAME");
+  intervalId = setInterval(gameTick, 1000 / 60);
 }
 
 canvas.addEventListener("touchstart", (e) => {
@@ -286,7 +272,7 @@ canvas.addEventListener("touchstart", (e) => {
   if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
     gameStarted = true;
     awaitingFirstFlap = false;
-    requestAnimationFrame(gameLoop);
+    intervalId = setInterval(gameTick, 1000 / 60);
   } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
     restartGame();
   } else {
@@ -300,7 +286,7 @@ document.addEventListener("keydown", (e) => {
     if (!gameStarted) {
       gameStarted = true;
       awaitingFirstFlap = false;
-      requestAnimationFrame(gameLoop);
+      intervalId = setInterval(gameTick, 1000 / 60);
     } else {
       flap();
     }
