@@ -112,7 +112,8 @@ function updatePipes() {
   if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
   if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
   pipes.forEach(pipe => {
-    if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+    const passedMid = bird.x > pipe.x + pipeWidth / 2 && !pipe.passed;
+    if (passedMid) {
       pipe.passed = true;
       score++;
       if (soundOn) pointSound.cloneNode(true).play();
