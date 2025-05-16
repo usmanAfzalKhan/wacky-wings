@@ -76,8 +76,8 @@ let awaitingFirstFlap = false;
 let tapCooldown = false;
 
 const pipeSpeed = 4.2; // faster pipe movement
-const pipeSpacing = 40; // even closer pipes
-const pipeGap = 210;
+const pipeSpacing = 50; // even closer pipes
+const pipeGap = 225;
 const jumpStrength = -4.6; // higher flap
 
 const birdImg = new Image();
@@ -105,7 +105,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.31, // slightly stronger gravity
+  gravity: 0.26, // slightly stronger gravity
   jumpStrength,
   maxVelocity: 6.5,
   angle: 0
