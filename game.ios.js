@@ -249,23 +249,29 @@ function restartGame() {
 }
 
 canvas.addEventListener("touchstart", (e) => {
-  if (tapCooldown) return;
-  tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 150);
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-  if (!gameStarted && x >= 100 && x <= 220 && y >= 250 && y <= 290) {
-    gameStarted = true;
-    awaitingFirstFlap = false;
-    intervalId = setInterval(gameTick, 1000 / 60);
-  } else if (gameOver && allowRestart && x >= 100 && x <= 220 && y >= 310 && y <= 350) {
-    restartGame();
-  } else {
-    flap();
-  }
-}, { passive: false });
+    if (tapCooldown) return;
+    tapCooldown = true;
+    setTimeout(() => tapCooldown = false, 150);
+  
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+  
+    // Log tap for debugging
+    console.log("Tap at", x, y);
+  
+    if (!gameStarted) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      intervalId = setInterval(gameTick, 1000 / 60);
+    } else if (gameOver && allowRestart) {
+      restartGame();
+    } else {
+      flap();
+    }
+  }, { passive: false });
+  
 
 document.addEventListener("keydown", (e) => {
   unlockAudio();
