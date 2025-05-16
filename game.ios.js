@@ -75,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 4.8; // faster pipe movement
-const pipeSpacing = 70; // even closer pipes
+const pipeSpeed = 4.2; // faster pipe movement
+const pipeSpacing = 40; // even closer pipes
 const pipeGap = 210;
-const jumpStrength = -4.0; // higher flap
+const jumpStrength = -4.6; // higher flap
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
