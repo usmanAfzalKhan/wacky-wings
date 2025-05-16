@@ -24,6 +24,8 @@ const ctx = canvas.getContext("2d", { alpha: false });
 canvas.width = 320;
 canvas.height = 480;
 ctx.imageSmoothingEnabled = false;
+canvas.style.marginTop = "50px";
+canvas.style.display = "block";
 
 let soundOn = true;
 const pointSound = new Audio("audio/point.mp3");
@@ -45,8 +47,8 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 1.95; // increased speed
-const pipeSpacing = 80; // shorter spacing
+const pipeSpeed = 1.95;
+const pipeSpacing = 95; // slightly increased spacing
 const pipeGap = 215;
 
 const bird = {
