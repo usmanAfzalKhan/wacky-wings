@@ -75,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 4.6; // increased
-const pipeSpacing = 75; // closer pipes
+const pipeSpeed = 4.8; // faster pipe movement
+const pipeSpacing = 70; // even closer pipes
 const pipeGap = 210;
-const jumpStrength = -3.2; // slightly more jump
+const jumpStrength = -3.6; // higher flap
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -105,7 +105,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.34, // increased gravity
+  gravity: 0.31, // slightly stronger gravity
   jumpStrength,
   maxVelocity: 6.5,
   angle: 0
@@ -118,6 +118,7 @@ let frameCount = 0;
 let bgX = 0;
 
 // [Rest of the game logic remains unchanged]
+
 
 
 function updatePlayerStats(finalScore) {
