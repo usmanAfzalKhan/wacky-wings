@@ -1,0 +1,43 @@
+/* game.ios.css – Optimized for iOS Safari and WKWebView */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+    touch-action: none;
+    background-color: black;
+  }
+  
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    image-rendering: pixelated;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+    z-index: 0;
+  }
+  
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide DOM score to reduce iOS lag */
+  #scoreDisplay {
+    display: none;
+  }
+  
+  /* Optional: override navbar */
+  .navbar {
+    display: none !important;
+  }
+  
