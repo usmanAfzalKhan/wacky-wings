@@ -32,7 +32,7 @@ pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
 const bgImg = new Image();
-bgImg.src = "images/background.webp";
+bgImg.src = "images/background.png";
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
 const pipeImg = new Image();
@@ -45,8 +45,8 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 1.75;
-const pipeSpacing = 145;
+const pipeSpeed = 1.95; // increased speed
+const pipeSpacing = 80; // shorter spacing
 const pipeGap = 215;
 
 const bird = {
@@ -170,7 +170,7 @@ function gameTick() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
   updateBird();
-  if (frameCount % 2 === 0) updatePipes();
+  updatePipes();
   drawPipes();
   drawBird();
   drawScore();
