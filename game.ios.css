@@ -1,37 +1,40 @@
-/* game.ios.css – Optimized for iOS Safari and WKWebView */
-
-html, body {
+body {
     margin: 0;
     padding: 0;
+    background: #000;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     overflow: hidden;
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: auto;
-    touch-action: none;
-    background-color: black;
   }
   
-  canvas {
-    display: block;
+  .navbar {
     width: 100%;
-    height: calc(100vh - 60px); /* account for header height */
-    margin-top: 60px; /* push canvas below header */
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+  }
+  
+  #gameCanvas {
+    display: block;
+    width: 100vw;
+    height: calc(100vh - 60px); /* adjust based on navbar height */
+    margin-top: 60px;
     image-rendering: pixelated;
     touch-action: none;
-    -webkit-touch-callout: none;
     -webkit-user-select: none;
-    user-select: none;
     -webkit-tap-highlight-color: transparent;
-    will-change: transform;
-    z-index: 0;
+    background-color: #70c5ce;
+    border: none;
   }
   
-  
-  /* Hide scrollbars */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Hide DOM score to reduce iOS lag */
-  #scoreDisplay {
-    display: none;
-  }
