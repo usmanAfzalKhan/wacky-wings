@@ -1,3 +1,6 @@
+
+// === Wacky Wings – Final iOS Optimized (with Background Fallback) ===
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
@@ -63,10 +66,25 @@ const jumpStrength = -4.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
+
 const pipeImg = new Image();
 pipeImg.src = "images/pipe.png";
+
+// Background with fallback
+let bgLoaded = false;
 const bgImg = new Image();
 bgImg.src = "images/background.webp";
+bgImg.onload = () => {
+  bgLoaded = true;
+  drawStartMenu();
+};
+bgImg.onerror = () => {
+  bgImg.src = "images/background.png";
+  bgImg.onload = () => {
+    bgLoaded = true;
+    drawStartMenu();
+  };
+};
 
 const bird = {
   width: 40,
@@ -106,6 +124,7 @@ function flap() {
 }
 
 function drawBackground() {
+  if (!bgLoaded) return;
   bgX -= pipeSpeed / 2.3;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
@@ -233,6 +252,29 @@ function gameLoop(timestamp) {
   if (!gameOver) requestAnimationFrame(gameLoop);
 }
 
+function drawCyberButton(x, y, w, h, label) {
+  ctx.fillStyle = "#00ffff";
+  ctx.strokeStyle = "#ff00ff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, w, h);
+  ctx.font = "bold 14px 'Segoe UI'";
+  ctx.fillStyle = "#000";
+  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
+}
+
+function drawStartMenu() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
+  drawCyberButton(140, 250, 120, 40, "START GAME");
+}
+
 canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
@@ -264,14 +306,3 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
-
-bgImg.onload = () => {
-  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-  drawBird();
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
-  ctx.font = "16px 'Segoe UI'";
-  ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
-  drawCyberButton(140, 250, 120, 40, "START GAME");
-};
