@@ -92,6 +92,8 @@ function drawBird() {
 }
 
 function drawScore() {
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isiOS) return;
   ctx.font = "bold 20px 'Segoe UI'";
   ctx.fillStyle = "white";
   ctx.fillText(`Score: ${score}`, 12, 30);
