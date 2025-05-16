@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Version (Optimized & Matched to Android Feel) ===
+// === Wacky Wings – iOS Version (Final Optimized – Android-Matched Physics & Speed) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -28,6 +28,7 @@ canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
+ctx.imageSmoothingEnabled = false; // ✅ for pixel sharpness on iOS
 
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
@@ -75,10 +76,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.65;
+const pipeSpeed = 1.75; // ✅ Faster pipe speed
 const pipeSpacing = 145;
 const pipeGap = 215;
-const jumpStrength = -4.6;
+const jumpStrength = -4.8; // ✅ More powerful flap
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -105,7 +106,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.17,
+  gravity: 0.18, // ✅ Slightly faster descent
   jumpStrength,
   maxVelocity: 6.3,
   angle: 0
@@ -305,13 +306,13 @@ function gameLoop() {
     return;
   }
   frameCount++;
-  if (!gameOver) requestAnimationFrame(gameLoop); // ✅ restored native rAF
+  if (!gameOver) requestAnimationFrame(gameLoop);
 }
 
 canvas.addEventListener("touchstart", (e) => {
   if (tapCooldown) return;
   tapCooldown = true;
-  setTimeout(() => tapCooldown = false, 150); // tighter response
+  setTimeout(() => tapCooldown = false, 150);
 
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches[0];
