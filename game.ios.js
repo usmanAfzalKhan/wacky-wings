@@ -1,12 +1,10 @@
-// === Wacky Wings – Ultra Optimized (iOS Fast Mode – setInterval Based) ===
+// === Wacky Wings – iOS Final Performance Version (Canvas Score, No DOM Lag) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore, doc, getDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import {
-  getAuth
-} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
@@ -23,8 +21,8 @@ const auth = getAuth(app);
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
-canvas.width = 400;
-canvas.height = 600;
+canvas.width = 320;
+canvas.height = 480;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 ctx.imageSmoothingEnabled = false;
 
@@ -48,22 +46,6 @@ birdImg.src = "images/bird.png";
 
 const pipeImg = new Image();
 pipeImg.src = "images/pipe.png";
-
-let scoreDisplay = document.getElementById("scoreDisplay");
-if (!scoreDisplay) {
-  scoreDisplay = document.createElement("div");
-  scoreDisplay.id = "scoreDisplay";
-  scoreDisplay.style.marginTop = "60px";
-  scoreDisplay.style.fontSize = "20px";
-  scoreDisplay.style.fontWeight = "bold";
-  scoreDisplay.style.color = "black";
-  scoreDisplay.style.backgroundColor = "rgba(255,255,255,0.8)";
-  scoreDisplay.style.padding = "6px 10px";
-  scoreDisplay.style.borderRadius = "8px";
-  scoreDisplay.style.display = "inline-block";
-  scoreDisplay.textContent = "Score: 0";
-  document.body.appendChild(scoreDisplay);
-}
 
 let score = 0;
 let gameOver = false;
@@ -143,6 +125,12 @@ function drawCyberButton(x, y, w, h, label) {
   ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
 }
 
+function drawCanvasScore() {
+  ctx.font = "bold 20px 'Segoe UI'";
+  ctx.fillStyle = "white";
+  ctx.fillText(`Score: ${score}`, 12, 30);
+}
+
 function drawStartMenu() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
@@ -152,7 +140,7 @@ function drawStartMenu() {
   ctx.fillStyle = "#fff";
   ctx.font = "16px 'Segoe UI'";
   ctx.fillText("Tap to flap", canvas.width / 2 - 50, 230);
-  drawCyberButton(140, 250, 120, 40, "START GAME");
+  drawCyberButton(100, 250, 120, 40, "START GAME");
 }
 
 function createPipe() {
@@ -170,7 +158,6 @@ function updatePipes() {
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       pipe.passed = true;
       score++;
-      scoreDisplay.textContent = `Score: ${score}`;
       if (soundOn) {
         const point = pointSound.cloneNode(true);
         point.volume = 0.35;
@@ -212,10 +199,10 @@ function drawFlatlined() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
   ctx.font = "bold 28px 'Segoe UI'";
-  ctx.fillText("FLATLINED", 120, 240);
+  ctx.fillText("FLATLINED", 90, 240);
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText(`Score: ${score}`, 170, 280);
+  ctx.fillText(`Score: ${score}`, 120, 280);
   allowRestart = true;
 }
 
@@ -240,6 +227,7 @@ function gameTick() {
   updatePipes();
   drawPipes();
   drawBird();
+  drawCanvasScore();
   if (!gameOver && checkCollision()) {
     gameOver = true;
     drawFlatlined();
@@ -257,7 +245,6 @@ function restartGame() {
   bird.velocity = 0;
   bird.angle = 0;
   frameCount = 0;
-  scoreDisplay.textContent = "Score: 0";
   intervalId = setInterval(gameTick, 1000 / 60);
 }
 
@@ -269,11 +256,11 @@ canvas.addEventListener("touchstart", (e) => {
   const touch = e.touches[0];
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
-  if (!gameStarted && x >= 140 && x <= 260 && y >= 250 && y <= 290) {
+  if (!gameStarted && x >= 100 && x <= 220 && y >= 250 && y <= 290) {
     gameStarted = true;
     awaitingFirstFlap = false;
     intervalId = setInterval(gameTick, 1000 / 60);
-  } else if (gameOver && allowRestart && x >= 140 && x <= 260 && y >= 310 && y <= 350) {
+  } else if (gameOver && allowRestart && x >= 100 && x <= 220 && y >= 310 && y <= 350) {
     restartGame();
   } else {
     flap();

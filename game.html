@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wacky Wings - Game</title>
+  
+  <!-- iOS-only CSS loader -->
+  <script>
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isiOS) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "game.ios.css"; // your custom iOS CSS file
+      document.head.appendChild(link);
+    }
+  </script>
+
   <style>
     body {
       margin: 0;
@@ -32,23 +44,20 @@
     }
 
     .logo-link img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-/* Hover: Slightly enlarge the image */
-.logo-link img:hover {
-  transform: scale(1.2);
-}
+    .logo-link img:hover {
+      transform: scale(1.2);
+    }
 
-/* Active (on click): Show a neon ring around it */
-.logo-link img:active {
-  box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
-}
-
+    .logo-link img:active {
+      box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+    }
 
     .dropdown {
       position: relative;
@@ -141,7 +150,6 @@
   <div id="scoreDisplay">Score: 0</div>
   <canvas id="gameCanvas" width="400" height="600" style="width: 400px; height: 600px;"></canvas>
 
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
@@ -203,21 +211,21 @@
     });
   </script>
 
-<script type="module">
-  const userAgent = navigator.userAgent || '';
-  const script = document.createElement('script');
+  <script type="module">
+    const userAgent = navigator.userAgent || '';
+    const script = document.createElement('script');
 
-  if (/iPhone|iPad|iPod/.test(userAgent)) {
-    script.src = 'game.ios.js';
-  } else if (/Android/.test(userAgent)) {
-    script.src = 'game.android.js';
-  } else {
-    script.src = 'game.desktop.js';
-  }
+    if (/iPhone|iPad|iPod/.test(userAgent)) {
+      script.src = 'game.ios.js';
+    } else if (/Android/.test(userAgent)) {
+      script.src = 'game.android.js';
+    } else {
+      script.src = 'game.desktop.js';
+    }
 
-  script.type = 'module';
-  document.body.appendChild(script);
-</script>
+    script.type = 'module';
+    document.body.appendChild(script);
+  </script>
 
 </body>
 </html>
