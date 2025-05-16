@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Version (Balanced & Fast) ===
+// === Wacky Wings – iOS Version (Faster Gameplay Tweaks) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -75,10 +75,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 2.2;
-const pipeSpacing = 135;
+const pipeSpeed = 2.5;
+const pipeSpacing = 140;
 const pipeGap = 210;
-const jumpStrength = -3.8;
+const jumpStrength = -3.6;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -105,9 +105,9 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.17,
+  gravity: 0.19,
   jumpStrength,
-  maxVelocity: 6.0,
+  maxVelocity: 6.4,
   angle: 0
 };
 
