@@ -1,4 +1,4 @@
-// === Wacky Wings – iOS Version (Final Optimized – Android-Matched Physics & Speed) ===
+// === Wacky Wings – iOS Version (Final Lean Build – Only Point Sound) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -28,7 +28,7 @@ canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
-ctx.imageSmoothingEnabled = false; // ✅ for pixel sharpness on iOS
+ctx.imageSmoothingEnabled = false;
 
 let soundOn = true;
 let scoreDisplay = document.getElementById("scoreDisplay");
@@ -76,10 +76,10 @@ let audioUnlocked = false;
 let awaitingFirstFlap = false;
 let tapCooldown = false;
 
-const pipeSpeed = 1.75; // ✅ Faster pipe speed
+const pipeSpeed = 1.75;
 const pipeSpacing = 145;
 const pipeGap = 215;
-const jumpStrength = -4.8; // ✅ More powerful flap
+const jumpStrength = -4.8;
 
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
@@ -90,11 +90,7 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
-const deadSound = new Audio("audio/dead.mp3");
-deadSound.volume = 0.25;
-deadSound.playsInline = true;
-deadSound.crossOrigin = "anonymous";
-
+// ✅ Only sound kept
 const pointSound = new Audio("audio/point.mp3");
 pointSound.volume = 0.35;
 pointSound.playsInline = true;
@@ -106,7 +102,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.18, // ✅ Slightly faster descent
+  gravity: 0.18,
   jumpStrength,
   maxVelocity: 6.3,
   angle: 0
@@ -141,9 +137,7 @@ function updatePlayerStats(finalScore) {
 
 function unlockAudio() {
   if (!audioUnlocked) {
-    [deadSound, pointSound].forEach(sound => {
-      try { sound.play().then(() => sound.pause()); } catch (_) {}
-    });
+    try { pointSound.play().then(() => pointSound.pause()); } catch (_) {}
     audioUnlocked = true;
   }
 }
@@ -261,11 +255,6 @@ function drawFlatlined() {
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
   updatePlayerStats(score);
-  if (soundOn) {
-    const dead = deadSound.cloneNode(true);
-    dead.volume = 0.25;
-    dead.play();
-  }
 }
 
 function updateBird() {
