@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix + Speed Adjustments) ===
+// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix + Speed Adjustments + Dead Sound) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -66,6 +66,11 @@ const pointSound = new Audio("audio/point.mp3");
 pointSound.volume = 0.35;
 pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
+
+const deadSound = new Audio("audio/dead.mp3");
+deadSound.volume = 0.35;
+deadSound.playsInline = true;
+deadSound.crossOrigin = "anonymous";
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
@@ -189,6 +194,7 @@ function checkCollision() {
 
 function drawGameOver() {
   updatePlayerStats(score);
+  if (soundOn) deadSound.cloneNode(true).play();
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
