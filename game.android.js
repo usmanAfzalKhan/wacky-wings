@@ -83,17 +83,16 @@ function unlockAudioContext() {
   }
 }
 
-// === iOS Sound Toggle Button ===
-if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-  const btn = document.createElement("div");
-  btn.textContent = "Sound: ON";
-  btn.style.cssText = "margin: 6px auto; padding: 6px 12px; background-color: #101020; color: #00ffff; font-weight: bold; border: 2px solid #00ffff; border-radius: 8px; font-family: 'Segoe UI', sans-serif; cursor: pointer; width: fit-content;";
-  btn.onclick = () => {
-    soundOn = !soundOn;
-    btn.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
-  };
-  document.getElementById("scoreDisplay")?.after(btn);
-}
+// === Sound Toggle Button (All Platforms) ===
+const soundBtn = document.createElement("div");
+soundBtn.textContent = "Sound: ON";
+soundBtn.style.cssText = "margin: 6px auto; padding: 6px 12px; background-color: #101020; color: #00ffff; font-weight: bold; border: 2px solid #00ffff; border-radius: 8px; font-family: 'Segoe UI', sans-serif; cursor: pointer; width: fit-content;";
+soundBtn.onclick = () => {
+  soundOn = !soundOn;
+  soundBtn.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
+};
+document.getElementById("scoreDisplay")?.after(soundBtn);
+
 
 // === Load Game Assets ===
 const bgImg = new Image(); bgImg.src = "images/background.png";
