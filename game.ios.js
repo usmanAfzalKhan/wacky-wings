@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Canvas Only, Fast + Header Safe + Stats Update) ===
+// === Wacky Wings – Final Optimized iOS Version (Tight Collision) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -81,7 +81,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 2.15;
+const pipeSpeed = 2.25;
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -91,7 +91,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.205,
+  gravity: 0.215,
   jumpStrength: -4.8,
   maxVelocity: 6.3,
   angle: 0
@@ -172,10 +172,17 @@ function drawPipes() {
 }
 
 function checkCollision() {
+  const hitboxOffsetX = 4;
+  const hitboxOffsetY = 2;
   for (const pipe of pipes) {
-    const withinX = bird.x + bird.width > pipe.x + 7 && bird.x < pipe.x + pipeWidth - 7;
-    const hitsTop = bird.y + 3 < pipe.topY;
-    const hitsBottom = bird.y + bird.height - 3 > pipe.bottomY;
+    const birdLeft = bird.x + hitboxOffsetX;
+    const birdRight = bird.x + bird.width - hitboxOffsetX;
+    const birdTop = bird.y + hitboxOffsetY;
+    const birdBottom = bird.y + bird.height - hitboxOffsetY;
+
+    const withinX = birdRight > pipe.x && birdLeft < pipe.x + pipeWidth;
+    const hitsTop = birdTop < pipe.topY;
+    const hitsBottom = birdBottom > pipe.bottomY;
     if (withinX && (hitsTop || hitsBottom)) return true;
   }
   return bird.y <= 0 || bird.y + bird.height >= canvas.height;
