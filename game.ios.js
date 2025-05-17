@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Sound Fix with Web Audio API + Tighter Spacing) ===
+// === Wacky Wings – Final Optimized iOS Version (Fixed Template Errors + CSS) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -6,6 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
+// === Firebase Config & Auth Setup ===
 const firebaseConfig = {
   apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
   authDomain: "wacky-wings.firebaseapp.com",
@@ -24,6 +25,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) currentUID = user.uid;
 });
 
+// === Update Player Stats in Firestore ===
 function updatePlayerStats(finalScore) {
   if (!currentUID) return;
   const userRef = doc(db, "users", currentUID);
@@ -44,6 +46,7 @@ function updatePlayerStats(finalScore) {
   });
 }
 
+// === Canvas Setup ===
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
 canvas.width = 320;
@@ -53,7 +56,7 @@ canvas.style.margin = "10px auto 60px auto";
 canvas.style.display = "block";
 document.body.style.overflowY = "scroll";
 
-// === Web Audio Setup ===
+// === Web Audio API Setup ===
 let soundOn = true;
 let audioContext;
 let pointBuffer, deadBuffer;
@@ -80,22 +83,11 @@ function unlockAudioContext() {
   }
 }
 
-// === Sound Toggle Button (iOS only) ===
+// === iOS Sound Toggle Button ===
 if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
   const btn = document.createElement("div");
   btn.textContent = "Sound: ON";
-  btn.style.cssText = `
-    margin: 6px auto;
-    padding: 6px 12px;
-    background-color: #101020;
-    color: #00ffff;
-    font-weight: bold;
-    border: 2px solid #00ffff;
-    border-radius: 8px;
-    font-family: 'Segoe UI', sans-serif;
-    cursor: pointer;
-    width: fit-content;
-  `;
+  btn.style.cssText = "margin: 6px auto; padding: 6px 12px; background-color: #101020; color: #00ffff; font-weight: bold; border: 2px solid #00ffff; border-radius: 8px; font-family: 'Segoe UI', sans-serif; cursor: pointer; width: fit-content;";
   btn.onclick = () => {
     soundOn = !soundOn;
     btn.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
@@ -103,13 +95,12 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
   document.getElementById("scoreDisplay")?.after(btn);
 }
 
-const bgImg = new Image();
-bgImg.src = "images/background.png";
-const birdImg = new Image();
-birdImg.src = "images/bird.png";
-const pipeImg = new Image();
-pipeImg.src = "images/pipe.png";
+// === Load Game Assets ===
+const bgImg = new Image(); bgImg.src = "images/background.png";
+const birdImg = new Image(); birdImg.src = "images/bird.png";
+const pipeImg = new Image(); pipeImg.src = "images/pipe.png";
 
+// === Game State Variables ===
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
@@ -139,6 +130,7 @@ const pipeTileHeight = 60;
 let frameCount = 0;
 let bgX = 0;
 
+// === Controls and Game Logic ===
 function flap() {
   if (!gameStarted) return;
   if (gameOver && allowRestart) return restartGame();
@@ -216,13 +208,20 @@ function checkCollision() {
 function drawGameOver() {
   updatePlayerStats(score);
   playSound(deadBuffer);
+
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   ctx.fillStyle = "#ff3366";
   ctx.font = "bold 28px 'Segoe UI'";
-  ctx.fillText("FLATLINED", 90, 240);
+  ctx.fillText("FLATLINED", 90, 220);
+
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
+  ctx.fillText(`Score: ${score}`, 120, 260);
+
+  drawCyberButton(80, 290, 160, 40, "REBOOT");
+
   allowRestart = true;
 }
 
@@ -269,7 +268,7 @@ function restartGame() {
   intervalId = setInterval(gameTick, 1000 / 60);
 }
 
-// === User Interaction (Unlock Audio Context) ===
+// === Input Event Handlers (Touch & Keyboard) ===
 canvas.addEventListener("touchstart", (e) => {
   unlockAudioContext();
   if (tapCooldown) return;
@@ -299,6 +298,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// === Initial Game Screen (On Image Load) ===
 bgImg.onload = () => {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
   drawBird();
@@ -310,6 +310,7 @@ bgImg.onload = () => {
   drawCyberButton(80, 250, 160, 40, "START GAME");
 };
 
+// === Draw a Stylized Button on Canvas ===
 function drawCyberButton(x, y, w, h, label) {
   ctx.fillStyle = "#00ffff";
   ctx.strokeStyle = "#ff00ff";
