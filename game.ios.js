@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Tight Collision) ===
+// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -81,7 +81,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 2.25;
+const pipeSpeed = 2.45;
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -91,7 +91,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.215,
+  gravity: 0.235,
   jumpStrength: -4.8,
   maxVelocity: 6.3,
   angle: 0
@@ -172,13 +172,12 @@ function drawPipes() {
 }
 
 function checkCollision() {
-  const hitboxOffsetX = 4;
-  const hitboxOffsetY = 2;
+  const offset = 1.5; // tighter margin
   for (const pipe of pipes) {
-    const birdLeft = bird.x + hitboxOffsetX;
-    const birdRight = bird.x + bird.width - hitboxOffsetX;
-    const birdTop = bird.y + hitboxOffsetY;
-    const birdBottom = bird.y + bird.height - hitboxOffsetY;
+    const birdLeft = bird.x + offset;
+    const birdRight = bird.x + bird.width - offset;
+    const birdTop = bird.y + offset;
+    const birdBottom = bird.y + bird.height - offset;
 
     const withinX = birdRight > pipe.x && birdLeft < pipe.x + pipeWidth;
     const hitsTop = birdTop < pipe.topY;
@@ -240,6 +239,8 @@ function restartGame() {
   bird.velocity = 0;
   bird.angle = 0;
   frameCount = 0;
+  const scoreEl = document.getElementById("scoreDisplay");
+  if (scoreEl) scoreEl.textContent = `Score: 0`;
   intervalId = setInterval(gameTick, 1000 / 60);
 }
 
