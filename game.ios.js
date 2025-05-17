@@ -81,7 +81,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 1.95;
+const pipeSpeed = 2.05; // increased slightly
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -91,7 +91,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.18,
+  gravity: 0.195, // increased slightly
   jumpStrength: -4.8,
   maxVelocity: 6.3,
   angle: 0
