@@ -1,13 +1,11 @@
-// === Wacky Wings – Desktop Version ===
+// === Wacky Wings – Desktop Version (Fully Commented) ===
 
+// Import required Firebase modules for app initialization, Firestore access, and user authentication
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-import {
-  getFirestore, doc, getDoc, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import {
-  getAuth, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
+// Firebase project configuration specific to the Wacky Wings project
 const firebaseConfig = {
   apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
   authDomain: "wacky-wings.firebaseapp.com",
@@ -17,21 +15,24 @@ const firebaseConfig = {
   appId: "1:86787566584:web:a4e421c1259763d061c40d"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Initialize Firebase app and services
+initializeApp(firebaseConfig);
+const db = getFirestore();
+const auth = getAuth();
 
+// === Canvas Setup ===
 const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d", { alpha: false });
+const ctx = canvas.getContext("2d", { alpha: false }); // Create 2D rendering context
 
+// Set dimensions explicitly to avoid scaling blurs
 canvas.style.width = "400px";
 canvas.style.height = "600px";
 canvas.width = 400;
 canvas.height = 600;
-ctx.setTransform(1, 0, 0, 1, 0, 0);
+ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix
 
-// === SCORE AND SOUND SETUP ===
-let soundOn = true;
+// === Score Display and Sound Toggle ===
+let soundOn = true; // Tracks sound state
 let scoreDisplay = document.getElementById("scoreDisplay");
 if (!scoreDisplay) {
   scoreDisplay = document.createElement("div");
@@ -49,27 +50,30 @@ if (!scoreDisplay) {
 }
 
 const soundBox = document.createElement("div");
-soundBox.style.display = "inline-block";
-soundBox.style.marginLeft = "10px";
-soundBox.style.backgroundColor = "#101020";
-soundBox.style.border = "2px solid #00ffff";
-soundBox.style.padding = "6px 12px";
-soundBox.style.borderRadius = "10px";
-soundBox.style.color = "#00ffff";
-soundBox.style.fontWeight = "bold";
-soundBox.style.fontFamily = "Segoe UI, sans-serif";
-soundBox.style.userSelect = "none";
-soundBox.style.cursor = "pointer";
-soundBox.style.verticalAlign = "middle";
+soundBox.style.cssText = `
+  display: inline-block;
+  margin-left: 10px;
+  background-color: #101020;
+  border: 2px solid #00ffff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: #00ffff;
+  font-weight: bold;
+  font-family: 'Segoe UI', sans-serif;
+  user-select: none;
+  cursor: pointer;
+  vertical-align: middle;
+`;
 soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
 scoreDisplay.after(soundBox);
 
+// Toggle sound on click
 soundBox.addEventListener("click", () => {
   soundOn = !soundOn;
   soundBox.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
 });
 
-// === GAME STATE VARIABLES ===
+// === Game State and Config ===
 let score = 0;
 let gameOver = false;
 let allowRestart = false;
@@ -82,6 +86,7 @@ const pipeSpacing = 90;
 const pipeGap = 165;
 const jumpStrength = -6.2;
 
+// === Assets ===
 const birdImg = new Image();
 birdImg.src = "images/bird.png";
 
@@ -91,6 +96,7 @@ pipeImg.src = "images/pipe.png";
 const bgImg = new Image();
 bgImg.src = "images/background.png";
 
+// Sound effects
 const flapSound = new Audio("audio/flap.mp3");
 flapSound.volume = 0.35;
 flapSound.playsInline = true;
@@ -106,6 +112,7 @@ pointSound.volume = 0.35;
 pointSound.playsInline = true;
 pointSound.crossOrigin = "anonymous";
 
+// Bird configuration and movement
 const bird = {
   width: 40,
   height: 40,
@@ -118,12 +125,43 @@ const bird = {
   angle: 0
 };
 
+// Pipes and animation frame tracking
 const pipes = [];
 const pipeWidth = 60;
 const pipeTileHeight = 60;
 let frameCount = 0;
 let bgX = 0;
 
+// === Audio Unlocking ===
+function unlockAudio() {
+  if (!audioUnlocked) {
+    [flapSound, deadSound, pointSound].forEach(sound => {
+      try {
+        sound.play().then(() => sound.pause());
+      } catch (_) {}
+    });
+    audioUnlocked = true;
+  }
+}
+
+// === Flap Control ===
+function flap() {
+  if (!gameStarted || awaitingFirstFlap) {
+    awaitingFirstFlap = false;
+    return;
+  }
+  if (gameOver && allowRestart) restartGame();
+  else if (!gameOver) {
+    bird.velocity = bird.jumpStrength * 1.1;
+    bird.angle = -30 * Math.PI / 180;
+    if (soundOn) {
+      flapSound.currentTime = 0;
+      flapSound.play();
+    }
+  }
+}
+
+// === Firestore Update Function ===
 function updatePlayerStats(finalScore) {
   const user = auth.currentUser;
   if (!user) return;
@@ -149,33 +187,7 @@ function updatePlayerStats(finalScore) {
   });
 }
 
-function unlockAudio() {
-  if (!audioUnlocked) {
-    [flapSound, deadSound, pointSound].forEach(sound => {
-      try {
-        sound.play().then(() => sound.pause());
-      } catch (_) {}
-    });
-    audioUnlocked = true;
-  }
-}
-
-function flap() {
-  if (!gameStarted || awaitingFirstFlap) {
-    awaitingFirstFlap = false;
-    return;
-  }
-  if (gameOver && allowRestart) restartGame();
-  else if (!gameOver) {
-    bird.velocity = bird.jumpStrength * 1.1;
-    bird.angle = -30 * Math.PI / 180;
-    if (soundOn) {
-      flapSound.currentTime = 0;
-      flapSound.play();
-    }
-  }
-}
-
+// === Drawing Functions ===
 function drawBackground() {
   bgX -= pipeSpeed / 2;
   if (bgX <= -canvas.width) bgX = 0;
@@ -224,6 +236,7 @@ function updatePipes() {
   pipes.forEach(pipe => pipe.x -= pipeSpeed);
   if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
   if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
+
   pipes.forEach(pipe => {
     if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
       pipe.passed = true;
@@ -266,6 +279,7 @@ function checkCollision() {
 }
 
 function drawFlatlined() {
+  updatePlayerStats(score);
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
@@ -276,7 +290,6 @@ function drawFlatlined() {
   ctx.fillText(`Score: ${score}`, 170, 280);
   drawCyberButton(140, 310, 120, 40, "REBOOT");
   allowRestart = true;
-  updatePlayerStats(score);
   if (soundOn) {
     const dead = deadSound.cloneNode(true);
     dead.volume = 0.25;
@@ -325,6 +338,20 @@ function gameLoop() {
   if (!gameOver) requestAnimationFrame(gameLoop);
 }
 
+// === User Input Handling ===
+document.addEventListener("keydown", (e) => {
+  unlockAudio();
+  if (e.code === "Space") {
+    if (!gameStarted) {
+      gameStarted = true;
+      awaitingFirstFlap = false;
+      gameLoop();
+    } else {
+      flap();
+    }
+  }
+});
+
 canvas.addEventListener("mousedown", (e) => {
   unlockAudio();
   const rect = canvas.getBoundingClientRect();
@@ -342,17 +369,5 @@ canvas.addEventListener("mousedown", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  unlockAudio();
-  if (e.code === "Space") {
-    if (!gameStarted) {
-      gameStarted = true;
-      awaitingFirstFlap = false;
-      gameLoop();
-    } else {
-      flap();
-    }
-  }
-});
-
+// Start screen once assets are loaded
 bgImg.onload = () => drawStartMenu();

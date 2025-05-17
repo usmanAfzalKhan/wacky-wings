@@ -1,39 +1,47 @@
-/* ios.css – Wacky Wings iOS Performance Fixes */
+/* Reset margin and padding for full-screen canvas, block scroll */
+html,
+body {
+  margin: 0; /* Remove default spacing around the page */
+  padding: 0; /* Remove internal spacing */
+  overflow: hidden; /* Prevent page from scrolling */
+  overscroll-behavior: none; /* Disable pull-to-refresh on mobile */
+  -webkit-overflow-scrolling: auto; /* Avoid bounce scroll effect on iOS */
+  touch-action: none; /* Prevent default gestures like pinch/scroll */
+  background-color: #000; /* Fallback black background if canvas fails */
+}
 
-html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: auto;
-    touch-action: none;
-    background-color: #000; /* fallback if canvas doesn’t load */
-  }
-  
-  canvas {
-    display: block;
-    image-rendering: pixelated;
-    touch-action: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-transform: translateZ(0); /* Force GPU acceleration */
-    will-change: transform;
-  }
-  
-  /* Optional: Hide iOS scrollbar areas */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-  
-  #scoreDisplay {
-    display: none; /* Disable DOM updates for score to improve FPS */
-  }
-  
-  /* Optional: Adjust navbar if needed */
-  .navbar {
-    backdrop-filter: none;
-    background-color: rgba(0, 0, 0, 0.6);
-  }
-  
+/* Optimize canvas for crisp rendering and better mobile interaction */
+canvas {
+  display: block; /* Make canvas take full block width */
+  image-rendering: pixelated; /* Keeps the pixel-art look instead of blurring */
+  touch-action: none; /* Block gestures on the canvas */
+  -webkit-touch-callout: none; /* Disable text/image context menu on long press */
+  -webkit-user-select: none; /* Prevent text selection */
+  user-select: none; /* Same as above, cross-browser */
+  -webkit-tap-highlight-color: transparent; /* Remove blue tap flash on iOS */
+  -webkit-transform: translateZ(
+    0
+  ); /* Forces GPU acceleration for smoother animation */
+  will-change: transform; /* Hints to browser that canvas will animate */
+}
+
+/* Hide scrollbars completely (mostly for Safari) */
+::-webkit-scrollbar {
+  display: none; /* Hide scrollbar to prevent UI clutter */
+}
+
+/* Hide score display element (we update it directly in JS to avoid layout shifts) */
+#scoreDisplay {
+  display: none; /* Disabling DOM-based score improves performance */
+}
+
+/* If you're using a navbar, make sure it blends well with gameplay */
+.navbar {
+  backdrop-filter: none; /* Remove blur (if used elsewhere) */
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.6
+  ); /* Semi-transparent dark background for contrast */
+}

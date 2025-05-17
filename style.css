@@ -1,17 +1,18 @@
-/* style.css – Cyberpunk Login Styling */
-
+/* Use border-box to include padding and borders in element's total width and height */
 * {
   box-sizing: border-box;
 }
 
+/* Full-page setup with gradient background and neon text color */
 body {
   margin: 0;
   height: 100vh;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); /* futuristic gradient */
   font-family: 'Segoe UI', sans-serif;
-  color: #00ffff;
+  color: #00ffff; /* neon cyan */
 }
 
+/* Container for the login/register section */
 .auth-page {
   display: flex;
   flex-direction: column;
@@ -20,42 +21,47 @@ body {
   min-height: 100vh;
 }
 
-/* Removed welcome-text and added logo styling */
+/* Logo image above the form with glow effects */
 .logo-image {
   width: 120px;
   height: 120px;
   margin-bottom: 30px;
-  filter: drop-shadow(0 0 10px #ff00ff);
+  filter: drop-shadow(0 0 10px #ff00ff); /* pink neon glow */
   border-radius: 50%;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Scale effect on hover for interactivity */
 .logo-image:hover {
   transform: scale(1.1);
 }
 
+/* Additional glow when clicked */
 .logo-image:active {
   box-shadow: 0 0 0 4px #00ffff, 0 0 10px #ff00ff;
 }
 
+/* Card-style container for login/register form */
 .auth-section {
   width: 100%;
   max-width: 360px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.4); /* translucent dark background */
   border: 2px solid #ff00ff;
   padding: 30px 25px;
   border-radius: 20px;
-  backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px); /* frosted glass effect */
   box-shadow: 0 0 10px #ff00ff;
   text-align: center;
 }
 
+/* Form heading styling */
 .auth-section h2 {
   margin-bottom: 20px;
   color: #00ffff;
   text-shadow: 0 0 5px #00ffff;
 }
 
+/* Input field styling */
 .auth-section input {
   width: 100%;
   padding: 10px 12px;
@@ -68,10 +74,12 @@ body {
   outline: none;
 }
 
+/* Lighter text color for input placeholders */
 .auth-section input::placeholder {
   color: #99ffff;
 }
 
+/* Button with neon gradient and animation */
 .auth-section button {
   width: 100%;
   padding: 10px;
@@ -87,11 +95,13 @@ body {
   margin-bottom: 10px;
 }
 
+/* Hover effect for neon button */
 .auth-section button:hover {
   transform: scale(1.03);
-  background: linear-gradient(45deg, #ff00ff, #00ffff);
+  background: linear-gradient(45deg, #ff00ff, #00ffff); /* reversed gradient */
 }
 
+/* Link styling under form */
 .auth-section a {
   color: #00ffff;
   text-decoration: none;
@@ -99,14 +109,17 @@ body {
   display: block;
 }
 
+/* Underline link on hover */
 .auth-section a:hover {
   text-decoration: underline;
 }
 
+/* Margin reset for form info text */
 .auth-section p {
   margin: 6px 0;
 }
 
+/* === Mobile Optimization === */
 @media (max-width: 480px) {
   .auth-page {
     padding-top: 20px;

@@ -1,21 +1,21 @@
-/* stats.css – Cyber style for Wacky Wings Stats Page */
-
+/* General body styles */
 body {
-    margin: 0;
-    padding: 0;
-    background: #1b066f;
-    font-family: 'Segoe UI', sans-serif;
-    color: #00ffff;
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    background: #1b066f; /* Cyber blue background */
+    font-family: 'Segoe UI', sans-serif; /* Sleek modern font */
+    color: #00ffff; /* Neon blue text */
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    min-height: 100vh;
+    min-height: 100vh; /* Ensure full vertical space is covered */
   }
   
+  /* Navbar fixed at top with blur effect */
   .navbar {
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3); /* Transparent black */
     color: white;
     display: flex;
     justify-content: space-between;
@@ -25,9 +25,10 @@ body {
     top: 0;
     left: 0;
     z-index: 1000;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px); /* Cyber-style blur */
   }
   
+  /* Logo image settings */
   .logo-link img {
     height: 40px;
     width: 40px;
@@ -36,18 +37,20 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
+  /* Logo hover and click effects */
   .logo-link img:hover {
-    transform: scale(1.2);
+    transform: scale(1.2); /* Slight zoom on hover */
   }
-  
   .logo-link img:active {
-    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+    box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff; /* Glow effect */
   }
   
+  /* Dropdown container */
   .dropdown {
     position: relative;
   }
   
+  /* Button to open dropdown */
   .dropdown-toggle {
     background: none;
     border: 2px solid #00ffff;
@@ -60,10 +63,12 @@ body {
     transition: background 0.2s;
   }
   
+  /* Hover effect for toggle */
   .dropdown-toggle:hover {
     background-color: rgba(0, 255, 255, 0.2);
   }
   
+  /* Dropdown menu styling */
   .dropdown-menu {
     position: absolute;
     top: 42px;
@@ -78,6 +83,7 @@ body {
     font-weight: bold;
   }
   
+  /* Items inside dropdown */
   .dropdown-menu a,
   .dropdown-menu button {
     display: block;
@@ -92,19 +98,22 @@ body {
     text-decoration: none;
   }
   
+  /* Hover effect for dropdown items */
   .dropdown-menu a:hover,
   .dropdown-menu button:hover {
     background-color: rgba(255, 0, 255, 0.2);
   }
   
+  /* Content wrapper */
   .container {
     flex: 1;
-    padding: 100px 1rem 2rem;
+    padding: 100px 1rem 2rem; /* Leave space for fixed navbar */
     width: 100%;
     max-width: 900px;
     box-sizing: border-box;
   }
   
+  /* Stat boxes (highlighted blocks) */
   .stat-box {
     border: 2px solid #00ffff;
     background-color: #0a0a0a;
@@ -115,31 +124,37 @@ body {
     box-sizing: border-box;
   }
   
+  /* Table styles */
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 2rem;
   }
   
+  /* Table cells */
   th, td {
     padding: 1rem;
     border: 1px solid #00ffff;
     text-align: left;
   }
   
+  /* Table headers */
   th {
     background-color: #111;
     color: #00ffff;
   }
   
+  /* Zebra striping for rows */
   tr:nth-child(even) {
     background-color: #0d0d0d;
   }
   
+  /* Highlight row on hover */
   tr:hover {
     background-color: #1a1a1a;
   }
   
+  /* Footer styling */
   footer {
     background-color: rgba(0, 0, 0, 0.3);
     border-top: 2px solid #00ffff;
@@ -148,7 +163,7 @@ body {
     width: 100%;
   }
   
-  /* Mobile optimization */
+  /* === Mobile optimization === */
   @media (max-width: 600px) {
     .dropdown-toggle {
       font-size: 14px;
