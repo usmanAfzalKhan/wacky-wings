@@ -110,7 +110,7 @@ let intervalId = null;
 
 const pipeSpeed = 2.75;
 const pipeSpacing = 85;
-const pipeGap = 210;
+const pipeGap = 200;
 
 const bird = {
   width: 40,
