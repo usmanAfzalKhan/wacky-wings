@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Sound Toggle + Tight Collision + Working Audio) ===
+// === Wacky Wings – Final Optimized iOS Version (Sound Fix + No Canvas Score + Toggle Button) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -27,22 +27,21 @@ onAuthStateChanged(auth, (user) => {
 function updatePlayerStats(finalScore) {
   if (!currentUID) return;
   const userRef = doc(db, "users", currentUID);
-  getDoc(userRef)
-    .then((snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      const prevHigh = data.highscore || 0;
-      const plays = data.timesPlayed || 0;
-      const avg = data.averageScore || 0;
-      const newHigh = Math.max(prevHigh, finalScore);
-      const newPlays = plays + 1;
-      const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-      return updateDoc(userRef, {
-        highscore: newHigh,
-        timesPlayed: newPlays,
-        averageScore: newAvg
-      });
+  getDoc(userRef).then((snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const prevHigh = data.highscore || 0;
+    const plays = data.timesPlayed || 0;
+    const avg = data.averageScore || 0;
+    const newHigh = Math.max(prevHigh, finalScore);
+    const newPlays = plays + 1;
+    const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
+    updateDoc(userRef, {
+      highscore: newHigh,
+      timesPlayed: newPlays,
+      averageScore: newAvg
     });
+  });
 }
 
 const canvas = document.getElementById("gameCanvas");
@@ -58,13 +57,16 @@ document.body.style.overflowY = "scroll";
 let soundOn = true;
 const pointSound = new Audio("audio/point.mp3");
 pointSound.volume = 0.35;
-pointSound.playsInline = true;
-pointSound.crossOrigin = "anonymous";
-
 const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.35;
-deadSound.playsInline = true;
-deadSound.crossOrigin = "anonymous";
+
+function playSound(sound) {
+  try {
+    const clone = sound.cloneNode();
+    clone.volume = sound.volume;
+    clone.play().catch(() => {});
+  } catch {}
+}
 
 // === Sound Toggle Button for iOS only ===
 if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
@@ -148,12 +150,6 @@ function drawBird() {
   ctx.restore();
 }
 
-function drawScore() {
-  ctx.font = "bold 20px 'Segoe UI'";
-  ctx.fillStyle = "white";
-  ctx.fillText(`Score: ${score}`, 12, 30);
-}
-
 function createPipe() {
   const minTopY = 50;
   const maxTopY = canvas.height - pipeGap - 50;
@@ -172,10 +168,7 @@ function updatePipes() {
       score++;
       const scoreEl = document.getElementById("scoreDisplay");
       if (scoreEl) scoreEl.textContent = `Score: ${score}`;
-      if (soundOn) {
-        const s = pointSound.cloneNode(true);
-        s.play();
-      }
+      if (soundOn) playSound(pointSound);
     }
   });
 }
@@ -212,10 +205,7 @@ function checkCollision() {
 
 function drawGameOver() {
   updatePlayerStats(score);
-  if (soundOn) {
-    const d = deadSound.cloneNode(true);
-    d.play();
-  }
+  if (soundOn) playSound(deadSound);
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
@@ -248,7 +238,6 @@ function gameTick() {
   updatePipes();
   drawPipes();
   drawBird();
-  drawScore();
   if (checkCollision()) {
     gameOver = true;
     drawGameOver();
