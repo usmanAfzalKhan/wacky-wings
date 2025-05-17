@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix) ===
+// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix + Speed Adjustments) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -81,7 +81,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 2.45;
+const pipeSpeed = 2.6;
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -91,8 +91,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.235,
-  jumpStrength: -4.8,
+  gravity: 0.25,
+  jumpStrength: -5.2,
   maxVelocity: 6.3,
   angle: 0
 };
@@ -172,7 +172,7 @@ function drawPipes() {
 }
 
 function checkCollision() {
-  const offset = 1.5; // tighter margin
+  const offset = 0.5;
   for (const pipe of pipes) {
     const birdLeft = bird.x + offset;
     const birdRight = bird.x + bird.width - offset;
