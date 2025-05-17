@@ -223,7 +223,6 @@ function drawGameOver() {
   ctx.fillText("FLATLINED", 90, 240);
   ctx.font = "18px 'Segoe UI'";
   ctx.fillStyle = "#fff";
-  ctx.fillText(`Score: ${score}`, 120, 280);
   allowRestart = true;
 }
 
