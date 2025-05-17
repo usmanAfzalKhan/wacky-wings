@@ -81,7 +81,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 2.05;
+const pipeSpeed = 2.15;
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -91,7 +91,7 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.195,
+  gravity: 0.205,
   jumpStrength: -4.8,
   maxVelocity: 6.3,
   angle: 0
@@ -173,9 +173,9 @@ function drawPipes() {
 
 function checkCollision() {
   for (const pipe of pipes) {
-    const withinX = bird.x + bird.width > pipe.x + 5 && bird.x < pipe.x + pipeWidth - 5; // tighter hitbox
-    const hitsTop = bird.y + 5 < pipe.topY;
-    const hitsBottom = bird.y + bird.height - 5 > pipe.bottomY;
+    const withinX = bird.x + bird.width > pipe.x + 7 && bird.x < pipe.x + pipeWidth - 7;
+    const hitsTop = bird.y + 3 < pipe.topY;
+    const hitsBottom = bird.y + bird.height - 3 > pipe.bottomY;
     if (withinX && (hitsTop || hitsBottom)) return true;
   }
   return bird.y <= 0 || bird.y + bird.height >= canvas.height;
