@@ -5,13 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wacky Wings - Login</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    @media (max-width: 600px) {
+      .game-description {
+        font-size: 14px;
+        padding: 0 12px;
+      }
+    }
+    .auth-page {
+      justify-content: flex-start;
+    }
+    .game-description {
+      margin-top: 5px !important;
+    }
+  </style>
 </head>
 <body>
   <div class="auth-page">
     <a href="https://github.com/usmanAfzalKhan/wacky-wings" target="_blank">
       <img src="images/logo.png" alt="Logo" class="logo-image" />
     </a>
-    
+
+    <!-- === GAME DESCRIPTION SECTION === -->
+    <div class="game-description" style="max-width: 600px; text-align: center; margin: 20px 0 10px; color: #00ffff;">
+      <h2 style="margin-bottom: 10px;">🕹️ Welcome to Wacky Wings</h2>
+      <p>
+        Dive into a neon-soaked aerial gauntlet where gravity is your greatest enemy and rhythm is your only lifeline.
+        <strong>Wacky Wings</strong> isn’t just a game—it’s a fast-paced test of your reflexes, patience, and skill.
+        Navigate your winged drone through glowing pipes, dodge obstacles, and rise to the top of the leaderboard.
+      </p>
+    </div>
+    <!-- === END GAME DESCRIPTION === -->
 
     <div class="auth-section" id="auth-container">
       <h2 id="form-title">Login</h2>
@@ -87,7 +111,6 @@
       if (password !== confirm) return alert("Passwords do not match.");
 
       try {
-        // Check for duplicate usernames
         const querySnapshot = await getDocs(collection(db, "users"));
         const usernameTaken = querySnapshot.docs.some(doc => doc.data().username === username);
         if (usernameTaken) return alert("Username already taken.");
@@ -122,8 +145,6 @@
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful!");
         window.location.href = "game.html";
-
-        // Redirect to game page here if needed
 
       } catch (error) {
         alert(error.message);
