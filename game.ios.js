@@ -1,24 +1,24 @@
-// === Wacky Wings – Final Optimized iOS Version (Canvas Only, Fast + Header Safe + Stats Update) ===
-
 function updatePlayerStats(finalScore) {
-    const user = auth.currentUser;
-    if (!user) return;
-    const userRef = doc(db, "users", user.uid);
-    getDoc(userRef).then((snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      const prevHigh = data.highscore || 0;
-      const plays = data.timesPlayed || 0;
-      const avg = data.averageScore || 0;
-      const newHigh = Math.max(prevHigh, finalScore);
-      const newPlays = plays + 1;
-      const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-      updateDoc(userRef, {
-        highscore: newHigh,
-        timesPlayed: newPlays,
-        averageScore: newAvg
-      });
-    });
+    if (!currentUID) return;
+    const userRef = doc(db, "users", currentUID);
+    getDoc(userRef)
+      .then((snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const prevHigh = data.highscore || 0;
+        const plays = data.timesPlayed || 0;
+        const avg = data.averageScore || 0;
+        const newHigh = Math.max(prevHigh, finalScore);
+        const newPlays = plays + 1;
+        const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
+        return updateDoc(userRef, {
+          highscore: newHigh,
+          timesPlayed: newPlays,
+          averageScore: newAvg
+        });
+      })
+      .then(() => console.log("Stats updated successfully."))
+      .catch((err) => console.error("Failed to update stats:", err));
   }
   
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -39,6 +39,16 @@ function updatePlayerStats(finalScore) {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  
+  let currentUID = null;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUID = user.uid;
+      console.log("User authenticated:", user.uid);
+    } else {
+      console.log("No user signed in.");
+    }
+  });
   
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d", { alpha: false });
