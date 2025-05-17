@@ -1,243 +1,257 @@
-function updatePlayerStats(finalScore) {
-    if (!currentUID) return;
-    const userRef = doc(db, "users", currentUID);
-    getDoc(userRef)
-      .then((snap) => {
-        if (!snap.exists()) return;
-        const data = snap.data();
-        const prevHigh = data.highscore || 0;
-        const plays = data.timesPlayed || 0;
-        const avg = data.averageScore || 0;
-        const newHigh = Math.max(prevHigh, finalScore);
-        const newPlays = plays + 1;
-        const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
-        return updateDoc(userRef, {
-          highscore: newHigh,
-          timesPlayed: newPlays,
-          averageScore: newAvg
-        });
-      })
-      .then(() => console.log("Stats updated successfully."))
-      .catch((err) => console.error("Failed to update stats:", err));
+// === Wacky Wings – Final Optimized iOS Version (Canvas Only, Fast + Header Safe + Stats Update) ===
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+  authDomain: "wacky-wings.firebaseapp.com",
+  projectId: "wacky-wings",
+  storageBucket: "wacky-wings.appspot.com",
+  messagingSenderId: "86787566584",
+  appId: "1:86787566584:web:a4e421c1259763d061c40d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUID = null;
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUID = user.uid;
+    console.log("User authenticated:", user.uid);
+  } else {
+    console.log("No user signed in.");
   }
-  
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc
-  } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
-    authDomain: "wacky-wings.firebaseapp.com",
-    projectId: "wacky-wings",
-    storageBucket: "wacky-wings.appspot.com",
-    messagingSenderId: "86787566584",
-    appId: "1:86787566584:web:a4e421c1259763d061c40d"
-  };
-  
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  
-  let currentUID = null;
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUID = user.uid;
-      console.log("User authenticated:", user.uid);
-    } else {
-      console.log("No user signed in.");
+});
+
+function updatePlayerStats(finalScore) {
+  if (!currentUID) return;
+  const userRef = doc(db, "users", currentUID);
+  getDoc(userRef)
+    .then((snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const prevHigh = data.highscore || 0;
+      const plays = data.timesPlayed || 0;
+      const avg = data.averageScore || 0;
+      const newHigh = Math.max(prevHigh, finalScore);
+      const newPlays = plays + 1;
+      const newAvg = Math.round(((avg * plays) + finalScore) / newPlays);
+      return updateDoc(userRef, {
+        highscore: newHigh,
+        timesPlayed: newPlays,
+        averageScore: newAvg
+      });
+    })
+    .then(() => console.log("Stats updated successfully."))
+    .catch((err) => console.error("Failed to update stats:", err));
+}
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d", { alpha: false });
+canvas.width = 320;
+canvas.height = 480;
+ctx.imageSmoothingEnabled = false;
+canvas.style.margin = "10px auto 60px auto";
+canvas.style.display = "block";
+document.body.style.overflowY = "scroll";
+
+let soundOn = true;
+const pointSound = new Audio("audio/point.mp3");
+pointSound.volume = 0.35;
+pointSound.playsInline = true;
+pointSound.crossOrigin = "anonymous";
+
+const bgImg = new Image();
+bgImg.src = "images/background.png";
+const birdImg = new Image();
+birdImg.src = "images/bird.png";
+const pipeImg = new Image();
+pipeImg.src = "images/pipe.png";
+
+let score = 0;
+let gameOver = false;
+let allowRestart = false;
+let gameStarted = false;
+let tapCooldown = false;
+let intervalId = null;
+
+const pipeSpeed = 1.95;
+const pipeSpacing = 95;
+const pipeGap = 215;
+
+const bird = {
+  width: 40,
+  height: 40,
+  x: 80,
+  y: 200,
+  velocity: 0,
+  gravity: 0.18,
+  jumpStrength: -4.8,
+  maxVelocity: 6.3,
+  angle: 0
+};
+
+const pipes = [];
+const pipeWidth = 60;
+const pipeTileHeight = 60;
+let frameCount = 0;
+let bgX = 0;
+
+function flap() {
+  if (!gameStarted) return;
+  if (gameOver && allowRestart) return restartGame();
+  bird.velocity = bird.jumpStrength;
+  bird.angle = -30 * Math.PI / 180;
+}
+
+function drawBackground() {
+  bgX -= pipeSpeed / 2.3;
+  if (bgX <= -canvas.width) bgX = 0;
+  ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
+  ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+}
+
+function drawBird() {
+  ctx.save();
+  ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
+  ctx.rotate(bird.angle);
+  ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
+  ctx.restore();
+}
+
+function drawScore() {
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isiOS) return;
+  ctx.font = "bold 20px 'Segoe UI'";
+  ctx.fillStyle = "white";
+  ctx.fillText(`Score: ${score}`, 12, 30);
+}
+
+function createPipe() {
+  const minTopY = 50;
+  const maxTopY = canvas.height - pipeGap - 50;
+  const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
+  pipes.push({ x: canvas.width, topY, bottomY: topY + pipeGap, passed: false });
+}
+
+function updatePipes() {
+  pipes.forEach(pipe => pipe.x -= pipeSpeed);
+  if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
+  if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
+  pipes.forEach(pipe => {
+    const passedMid = bird.x > pipe.x + pipeWidth / 2 && !pipe.passed;
+    if (passedMid) {
+      pipe.passed = true;
+      score++;
+      const scoreEl = document.getElementById("scoreDisplay");
+      if (scoreEl) scoreEl.textContent = `Score: ${score}`;
+      if (soundOn) pointSound.cloneNode(true).play();
     }
   });
-  
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d", { alpha: false });
-  canvas.width = 320;
-  canvas.height = 480;
-  ctx.imageSmoothingEnabled = false;
-  canvas.style.margin = "10px auto 60px auto";
-  canvas.style.display = "block";
-  document.body.style.overflowY = "scroll";
-  
-  let soundOn = true;
-  const pointSound = new Audio("audio/point.mp3");
-  pointSound.volume = 0.35;
-  pointSound.playsInline = true;
-  pointSound.crossOrigin = "anonymous";
-  
-  const bgImg = new Image();
-  bgImg.src = "images/background.png";
-  const birdImg = new Image();
-  birdImg.src = "images/bird.png";
-  const pipeImg = new Image();
-  pipeImg.src = "images/pipe.png";
-  
-  let score = 0;
-  let gameOver = false;
-  let allowRestart = false;
-  let gameStarted = false;
-  let tapCooldown = false;
-  let intervalId = null;
-  
-  const pipeSpeed = 1.95;
-  const pipeSpacing = 95; // slightly increased spacing
-  const pipeGap = 215;
-  
-  const bird = {
-    width: 40,
-    height: 40,
-    x: 80,
-    y: 200,
-    velocity: 0,
-    gravity: 0.18,
-    jumpStrength: -4.8,
-    maxVelocity: 6.3,
-    angle: 0
-  };
-  
-  const pipes = [];
-  const pipeWidth = 60;
-  const pipeTileHeight = 60;
-  let frameCount = 0;
-  let bgX = 0;
-  
-  function flap() {
-    if (!gameStarted) return;
-    if (gameOver && allowRestart) return restartGame();
-    bird.velocity = bird.jumpStrength;
-    bird.angle = -30 * Math.PI / 180;
-  }
-  
-  function drawBackground() {
-    bgX -= pipeSpeed / 2.3;
-    if (bgX <= -canvas.width) bgX = 0;
-    ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
-    ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
-  }
-  
-  function drawBird() {
-    ctx.save();
-    ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
-    ctx.rotate(bird.angle);
-    ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
-    ctx.restore();
-  }
-  
-  function drawScore() {
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isiOS) return;
-    ctx.font = "bold 20px 'Segoe UI'";
-    ctx.fillStyle = "white";
-    ctx.fillText(`Score: ${score}`, 12, 30);
-  }
-  
-  function createPipe() {
-    const minTopY = 50;
-    const maxTopY = canvas.height - pipeGap - 50;
-    const topY = Math.floor(Math.random() * (maxTopY - minTopY + 1)) + minTopY;
-    pipes.push({ x: canvas.width, topY, bottomY: topY + pipeGap, passed: false });
-  }
-  
-  function updatePipes() {
-    pipes.forEach(pipe => pipe.x -= pipeSpeed);
-    if (pipes.length && pipes[0].x + pipeWidth < 0) pipes.shift();
-    if ((frameCount > 0 && frameCount % pipeSpacing === 0) || frameCount === 1) createPipe();
-    pipes.forEach(pipe => {
-      const passedMid = bird.x > pipe.x + pipeWidth / 2 && !pipe.passed;
-      if (passedMid) {
-        pipe.passed = true;
-        score++;
-        const scoreEl = document.getElementById("scoreDisplay");
-        if (scoreEl) scoreEl.textContent = `Score: ${score}`;
-        if (soundOn) pointSound.cloneNode(true).play();
-      }
-    });
-  }
-  
-  function drawPipes() {
-    pipes.forEach(pipe => {
-      for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
-        ctx.save();
-        ctx.translate(pipe.x, y + pipeTileHeight);
-        ctx.scale(1, -1);
-        ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
-        ctx.restore();
-      }
-      for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
-        ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
-      }
-    });
-  }
-  
-  function checkCollision() {
-    for (const pipe of pipes) {
-      const withinX = bird.x + bird.width > pipe.x && bird.x < pipe.x + pipeWidth;
-      const hitsTop = bird.y < pipe.topY;
-      const hitsBottom = bird.y + bird.height > pipe.bottomY;
-      if (withinX && (hitsTop || hitsBottom)) return true;
+}
+
+function drawPipes() {
+  pipes.forEach(pipe => {
+    for (let y = 0; y < pipe.topY; y += pipeTileHeight) {
+      ctx.save();
+      ctx.translate(pipe.x, y + pipeTileHeight);
+      ctx.scale(1, -1);
+      ctx.drawImage(pipeImg, 0, 0, pipeWidth, pipeTileHeight);
+      ctx.restore();
     }
-    return bird.y <= 0 || bird.y + bird.height >= canvas.height;
-  }
-  
-  function drawGameOver() {
-    updatePlayerStats(score);
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ff3366";
-    ctx.font = "bold 28px 'Segoe UI'";
-    ctx.fillText("FLATLINED", 90, 240);
-    ctx.font = "18px 'Segoe UI'";
-    ctx.fillStyle = "#fff";
-    ctx.fillText(`Score: ${score}`, 120, 280);
-    allowRestart = true;
-  }
-  
-  function updateBird() {
-    bird.velocity += bird.gravity;
-    bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
-    bird.y += bird.velocity;
-    bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, Math.PI / 3) : -Math.PI / 6;
-    if (bird.y + bird.height >= canvas.height) {
-      gameOver = true;
-      drawGameOver();
-      clearInterval(intervalId);
+    for (let y = pipe.bottomY; y < canvas.height; y += pipeTileHeight) {
+      ctx.drawImage(pipeImg, pipe.x, y, pipeWidth, pipeTileHeight);
     }
-    if (bird.y < 0) bird.y = 0;
+  });
+}
+
+function checkCollision() {
+  for (const pipe of pipes) {
+    const withinX = bird.x + bird.width > pipe.x && bird.x < pipe.x + pipeWidth;
+    const hitsTop = bird.y < pipe.topY;
+    const hitsBottom = bird.y + bird.height > pipe.bottomY;
+    if (withinX && (hitsTop || hitsBottom)) return true;
   }
-  
-  function gameTick() {
-    if (gameOver) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground();
-    updateBird();
-    updatePipes();
-    drawPipes();
-    drawBird();
-    drawScore();
-    if (checkCollision()) {
-      gameOver = true;
-      drawGameOver();
-      clearInterval(intervalId);
-    }
-    frameCount++;
+  return bird.y <= 0 || bird.y + bird.height >= canvas.height;
+}
+
+function drawGameOver() {
+  updatePlayerStats(score);
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#ff3366";
+  ctx.font = "bold 28px 'Segoe UI'";
+  ctx.fillText("FLATLINED", 90, 240);
+  ctx.font = "18px 'Segoe UI'";
+  ctx.fillStyle = "#fff";
+  ctx.fillText(`Score: ${score}`, 120, 280);
+  allowRestart = true;
+}
+
+function updateBird() {
+  bird.velocity += bird.gravity;
+  bird.velocity = Math.min(bird.velocity, bird.maxVelocity);
+  bird.y += bird.velocity;
+  bird.angle = bird.velocity > 0 ? Math.min(bird.angle + 0.04, Math.PI / 3) : -Math.PI / 6;
+  if (bird.y + bird.height >= canvas.height) {
+    gameOver = true;
+    drawGameOver();
+    clearInterval(intervalId);
   }
-  
-  function restartGame() {
-    score = 0;
-    gameOver = false;
-    allowRestart = false;
-    pipes.length = 0;
-    bird.y = 200;
-    bird.velocity = 0;
-    bird.angle = 0;
-    frameCount = 0;
+  if (bird.y < 0) bird.y = 0;
+}
+
+function gameTick() {
+  if (gameOver) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  updateBird();
+  updatePipes();
+  drawPipes();
+  drawBird();
+  drawScore();
+  if (checkCollision()) {
+    gameOver = true;
+    drawGameOver();
+    clearInterval(intervalId);
+  }
+  frameCount++;
+}
+
+function restartGame() {
+  score = 0;
+  gameOver = false;
+  allowRestart = false;
+  pipes.length = 0;
+  bird.y = 200;
+  bird.velocity = 0;
+  bird.angle = 0;
+  frameCount = 0;
+  intervalId = setInterval(gameTick, 1000 / 60);
+}
+
+canvas.addEventListener("touchstart", (e) => {
+  if (tapCooldown) return;
+  tapCooldown = true;
+  setTimeout(() => tapCooldown = false, 150);
+  if (!gameStarted) {
+    gameStarted = true;
     intervalId = setInterval(gameTick, 1000 / 60);
+  } else if (gameOver && allowRestart) {
+    restartGame();
+  } else {
+    flap();
   }
-  
-  canvas.addEventListener("touchstart", (e) => {
-    if (tapCooldown) return;
-    tapCooldown = true;
-    setTimeout(() => tapCooldown = false, 150);
+}, { passive: false });
+
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
     if (!gameStarted) {
       gameStarted = true;
       intervalId = setInterval(gameTick, 1000 / 60);
@@ -246,40 +260,27 @@ function updatePlayerStats(finalScore) {
     } else {
       flap();
     }
-  }, { passive: false });
-  
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-      if (!gameStarted) {
-        gameStarted = true;
-        intervalId = setInterval(gameTick, 1000 / 60);
-      } else if (gameOver && allowRestart) {
-        restartGame();
-      } else {
-        flap();
-      }
-    }
-  });
-  
-  bgImg.onload = () => {
-    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    drawBird();
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#fff";
-    ctx.font = "16px 'Segoe UI'";
-    ctx.fillText("Tap to flap", 110, 230);
-    drawCyberButton(80, 250, 160, 40, "START GAME");
-  };
-  
-  function drawCyberButton(x, y, w, h, label) {
-    ctx.fillStyle = "#00ffff";
-    ctx.strokeStyle = "#ff00ff";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillRect(x, y, w, h);
-    ctx.font = "bold 14px 'Segoe UI'";
-    ctx.fillStyle = "#000";
-    ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
   }
-  
+});
+
+bgImg.onload = () => {
+  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  drawBird();
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.font = "16px 'Segoe UI'";
+  ctx.fillText("Tap to flap", 110, 230);
+  drawCyberButton(80, 250, 160, 40, "START GAME");
+};
+
+function drawCyberButton(x, y, w, h, label) {
+  ctx.fillStyle = "#00ffff";
+  ctx.strokeStyle = "#ff00ff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, w, h);
+  ctx.font = "bold 14px 'Segoe UI'";
+  ctx.fillStyle = "#000";
+  ctx.fillText(label, x + w / 2 - ctx.measureText(label).width / 2, y + h / 2 + 5);
+}
