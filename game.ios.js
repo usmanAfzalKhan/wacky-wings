@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Stricter Collision + Sound Toggle) ===
+// === Wacky Wings – Final Optimized iOS Version (Sound Fix with Web Audio API + Tighter Spacing) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -53,23 +53,34 @@ canvas.style.margin = "10px auto 60px auto";
 canvas.style.display = "block";
 document.body.style.overflowY = "scroll";
 
-// === Sounds ===
+// === Web Audio Setup ===
 let soundOn = true;
-const pointSound = new Audio("audio/point.mp3");
-pointSound.volume = 0.35;
-const deadSound = new Audio("audio/dead.mp3");
-deadSound.volume = 0.35;
+let audioContext;
+let pointBuffer, deadBuffer;
 
-function playSound(sound) {
-    try {
-      const clone = new Audio(sound.src); // clone using new Audio to avoid iOS restrictions
-      clone.volume = sound.volume;
-      clone.play().catch(() => {});
-    } catch {}
+async function loadSound(url) {
+  const res = await fetch(url);
+  const arrayBuffer = await res.arrayBuffer();
+  return await audioContext.decodeAudioData(arrayBuffer);
+}
+
+function playSound(buffer) {
+  if (!soundOn || !audioContext || !buffer) return;
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(audioContext.destination);
+  source.start(0);
+}
+
+function unlockAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    loadSound("audio/point.mp3").then(buf => pointBuffer = buf);
+    loadSound("audio/dead.mp3").then(buf => deadBuffer = buf);
   }
-  
+}
 
-// === Sound Toggle Button for iOS only ===
+// === Sound Toggle Button (iOS only) ===
 if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
   const btn = document.createElement("div");
   btn.textContent = "Sound: ON";
@@ -89,8 +100,7 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
     soundOn = !soundOn;
     btn.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
   };
-  const scoreDisplay = document.getElementById("scoreDisplay");
-  scoreDisplay?.after(btn);
+  document.getElementById("scoreDisplay")?.after(btn);
 }
 
 const bgImg = new Image();
@@ -169,7 +179,7 @@ function updatePipes() {
       score++;
       const scoreEl = document.getElementById("scoreDisplay");
       if (scoreEl) scoreEl.textContent = `Score: ${score}`;
-      if (soundOn) playSound(pointSound);
+      playSound(pointBuffer);
     }
   });
 }
@@ -205,7 +215,7 @@ function checkCollision() {
 
 function drawGameOver() {
   updatePlayerStats(score);
-  if (soundOn) playSound(deadSound);
+  playSound(deadBuffer);
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
@@ -260,7 +270,9 @@ function restartGame() {
   intervalId = setInterval(gameTick, 1000 / 60);
 }
 
+// === User Interaction (Unlock Audio Context) ===
 canvas.addEventListener("touchstart", (e) => {
+  unlockAudioContext();
   if (tapCooldown) return;
   tapCooldown = true;
   setTimeout(() => tapCooldown = false, 150);
@@ -275,6 +287,7 @@ canvas.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 document.addEventListener("keydown", (e) => {
+  unlockAudioContext();
   if (e.code === "Space") {
     if (!gameStarted) {
       gameStarted = true;
