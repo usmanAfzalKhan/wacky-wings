@@ -61,12 +61,13 @@ const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.35;
 
 function playSound(sound) {
-  try {
-    const clone = sound.cloneNode();
-    clone.volume = sound.volume;
-    clone.play().catch(() => {});
-  } catch {}
-}
+    try {
+      const clone = new Audio(sound.src); // clone using new Audio to avoid iOS restrictions
+      clone.volume = sound.volume;
+      clone.play().catch(() => {});
+    } catch {}
+  }
+  
 
 // === Sound Toggle Button for iOS only ===
 if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
@@ -107,7 +108,7 @@ let tapCooldown = false;
 let intervalId = null;
 
 const pipeSpeed = 2.75;
-const pipeSpacing = 95;
+const pipeSpacing = 85;
 const pipeGap = 215;
 
 const bird = {
