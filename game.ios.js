@@ -1,4 +1,4 @@
-// === Wacky Wings – Final Optimized iOS Version (Tighter Collision + Score Reset Fix + Speed Adjustments + Dead Sound) ===
+// === Wacky Wings – Final Optimized iOS Version (Sound Toggle + Tight Collision + Working Audio) ===
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
@@ -21,12 +21,7 @@ const auth = getAuth(app);
 
 let currentUID = null;
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUID = user.uid;
-    console.log("User authenticated:", user.uid);
-  } else {
-    console.log("No user signed in.");
-  }
+  if (user) currentUID = user.uid;
 });
 
 function updatePlayerStats(finalScore) {
@@ -47,9 +42,7 @@ function updatePlayerStats(finalScore) {
         timesPlayed: newPlays,
         averageScore: newAvg
       });
-    })
-    .then(() => console.log("Stats updated successfully."))
-    .catch((err) => console.error("Failed to update stats:", err));
+    });
 }
 
 const canvas = document.getElementById("gameCanvas");
@@ -61,6 +54,7 @@ canvas.style.margin = "10px auto 60px auto";
 canvas.style.display = "block";
 document.body.style.overflowY = "scroll";
 
+// === Sounds ===
 let soundOn = true;
 const pointSound = new Audio("audio/point.mp3");
 pointSound.volume = 0.35;
@@ -71,6 +65,30 @@ const deadSound = new Audio("audio/dead.mp3");
 deadSound.volume = 0.35;
 deadSound.playsInline = true;
 deadSound.crossOrigin = "anonymous";
+
+// === Sound Toggle Button for iOS only ===
+if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  const btn = document.createElement("div");
+  btn.textContent = "Sound: ON";
+  btn.style.cssText = `
+    margin: 6px auto;
+    padding: 6px 12px;
+    background-color: #101020;
+    color: #00ffff;
+    font-weight: bold;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    font-family: 'Segoe UI', sans-serif;
+    cursor: pointer;
+    width: fit-content;
+  `;
+  btn.onclick = () => {
+    soundOn = !soundOn;
+    btn.textContent = `Sound: ${soundOn ? "ON" : "OFF"}`;
+  };
+  const scoreDisplay = document.getElementById("scoreDisplay");
+  scoreDisplay?.after(btn);
+}
 
 const bgImg = new Image();
 bgImg.src = "images/background.png";
@@ -86,7 +104,7 @@ let gameStarted = false;
 let tapCooldown = false;
 let intervalId = null;
 
-const pipeSpeed = 2.6;
+const pipeSpeed = 2.65;
 const pipeSpacing = 95;
 const pipeGap = 215;
 
@@ -96,8 +114,8 @@ const bird = {
   x: 80,
   y: 200,
   velocity: 0,
-  gravity: 0.25,
-  jumpStrength: -5.2,
+  gravity: 0.27,
+  jumpStrength: -5.3,
   maxVelocity: 6.3,
   angle: 0
 };
@@ -131,8 +149,6 @@ function drawBird() {
 }
 
 function drawScore() {
-  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isiOS) return;
   ctx.font = "bold 20px 'Segoe UI'";
   ctx.fillStyle = "white";
   ctx.fillText(`Score: ${score}`, 12, 30);
@@ -156,7 +172,10 @@ function updatePipes() {
       score++;
       const scoreEl = document.getElementById("scoreDisplay");
       if (scoreEl) scoreEl.textContent = `Score: ${score}`;
-      if (soundOn) pointSound.cloneNode(true).play();
+      if (soundOn) {
+        const s = pointSound.cloneNode(true);
+        s.play();
+      }
     }
   });
 }
@@ -177,13 +196,12 @@ function drawPipes() {
 }
 
 function checkCollision() {
-  const offset = 0.5;
+  const hitPad = 0.5;
   for (const pipe of pipes) {
-    const birdLeft = bird.x + offset;
-    const birdRight = bird.x + bird.width - offset;
-    const birdTop = bird.y + offset;
-    const birdBottom = bird.y + bird.height - offset;
-
+    const birdLeft = bird.x + hitPad;
+    const birdRight = bird.x + bird.width - hitPad;
+    const birdTop = bird.y + hitPad;
+    const birdBottom = bird.y + bird.height - hitPad;
     const withinX = birdRight > pipe.x && birdLeft < pipe.x + pipeWidth;
     const hitsTop = birdTop < pipe.topY;
     const hitsBottom = birdBottom > pipe.bottomY;
@@ -194,7 +212,10 @@ function checkCollision() {
 
 function drawGameOver() {
   updatePlayerStats(score);
-  if (soundOn) deadSound.cloneNode(true).play();
+  if (soundOn) {
+    const d = deadSound.cloneNode(true);
+    d.play();
+  }
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ff3366";
