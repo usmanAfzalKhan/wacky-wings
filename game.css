@@ -35,21 +35,20 @@ canvas {
   display: none; /* Disabling DOM-based score improves performance */
 }
 
-/* If you're using a navbar, make sure it blends well with gameplay */
 .navbar {
-    width: 100%;                             /* Full width of the screen */
-    background-color: rgba(0, 0, 0, 0.3);    /* Translucent black background */
-    color: white;                            /* White text for visibility */
-    display: flex;                           /* Flexbox layout */
-    justify-content: space-between;         /* Space out items in navbar */
-    align-items: center;                    /* Vertically center contents */
-    padding: 12px 16px;                      /* Padding inside the navbar */
-    position: fixed;                         /* Stick to the top */
-    top: 0;                                  /* Align to top of the page */
-    left: 0;                                 /* Align to left edge */
-    z-index: 1000;                           /* Ensure it's on top of everything */
-    backdrop-filter: blur(10px);            /* Add blur for translucent effect */
-    -webkit-backdrop-filter: blur(10px);    /* Safari support */
+    background-color: rgba(0, 0, 0, 0.3); /* Translucent dark background */
+    backdrop-filter: blur(10px);          /* Adds blur for depth */
+    -webkit-backdrop-filter: blur(10px);  /* Safari support */
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   
