@@ -37,11 +37,18 @@ canvas {
 
 /* If you're using a navbar, make sure it blends well with gameplay */
 .navbar {
-  backdrop-filter: none; /* Remove blur (if used elsewhere) */
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.6
-  ); /* Semi-transparent dark background for contrast */
-}
+    backdrop-filter: blur(10px); /* Adds a subtle blur effect behind the navbar */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    background-color: rgba(0, 0, 0, 0.2); /* Slightly dark transparent background */
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
