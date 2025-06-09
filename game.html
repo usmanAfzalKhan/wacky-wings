@@ -1,231 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wacky Wings - Game</title>
-  
-  <!-- iOS-only CSS loader -->
-  <script>
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isiOS) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "game.ios.css"; // your custom iOS CSS file
-      document.head.appendChild(link);
-    }
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wacky Wings - Game</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #1b066f;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+    <!-- iOS-only CSS loader -->
+    <script>
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isiOS) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "game.ios.css"; // your custom iOS CSS file
+        document.head.appendChild(link);
+      }
+    </script>
 
-    .navbar {
-      width: 100%;
-      background-color: rgba(0, 0, 0, 0.3);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-    }
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #1b066f;
+        font-family: "Segoe UI", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
 
-    .logo-link img {
-      height: 40px;
-      width: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+      .navbar {
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+      }
 
-    .logo-link img:hover {
-      transform: scale(1.2);
-    }
+      .logo-link img {
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
 
-    .logo-link img:active {
-      box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
-    }
+      .logo-link img:hover {
+        transform: scale(1.2);
+      }
 
-    .dropdown {
-      position: relative;
-    }
+      .logo-link img:active {
+        box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+      }
 
-    .dropdown-toggle {
-      background: none;
-      border: 2px solid #00ffff;
-      color: #00ffff;
-      font-size: 16px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
+      .dropdown {
+        position: relative;
+      }
 
-    .dropdown-toggle:hover {
-      background-color: rgba(0, 255, 255, 0.2);
-    }
+      .dropdown-toggle {
+        background: none;
+        border: 2px solid #00ffff;
+        color: #00ffff;
+        font-size: 16px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+      }
 
-    .dropdown-menu {
-      position: absolute;
-      top: 42px;
-      left: 0;
-      background-color: #101020;
-      color: #00ffff;
-      border: 2px solid #ff00ff;
-      border-radius: 6px;
-      display: none;
-      z-index: 1001;
-      min-width: 140px;
-      font-weight: bold;
-    }
+      .dropdown-toggle:hover {
+        background-color: rgba(0, 255, 255, 0.2);
+      }
 
-    .dropdown-menu a,
-    .dropdown-menu button {
-      display: block;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: normal;
-      background: none;
-      border: none;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      color: #00ffff;
-      text-decoration: none;
-      box-sizing: border-box;
-    }
+      .dropdown-menu {
+        position: absolute;
+        top: 42px;
+        left: 0;
+        background-color: #101020;
+        color: #00ffff;
+        border: 2px solid #ff00ff;
+        border-radius: 6px;
+        display: none;
+        z-index: 1001;
+        min-width: 140px;
+        font-weight: bold;
+      }
 
-    .dropdown-menu a:hover,
-    .dropdown-menu button:hover {
-      background-color: rgba(255, 0, 255, 0.2);
-    }
+      .dropdown-menu a,
+      .dropdown-menu button {
+        display: block;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: normal;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        color: #00ffff;
+        text-decoration: none;
+        box-sizing: border-box;
+      }
 
-    #scoreDisplay {
-      margin-top: 80px;
-      margin-bottom: 10px;
-      font-size: 20px;
-      font-weight: bold;
-      color: black;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
+      .dropdown-menu a:hover,
+      .dropdown-menu button:hover {
+        background-color: rgba(255, 0, 255, 0.2);
+      }
 
-    #gameCanvas {
-      background: #70c5ce;
-      display: block;
-      border: 2px solid #000;
-    }
-  </style>
-</head>
-<body>
+      #scoreDisplay {
+        margin-top: 80px;
+        margin-bottom: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        color: black;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 6px 10px;
+        border-radius: 8px;
+      }
 
-  <header class="navbar">
-    <div class="dropdown">
-      <button id="usernameDisplay" class="dropdown-toggle">Loading ▼</button>
-      <div class="dropdown-menu" id="userMenu">
-        <a href="stats.html">My Stats</a>
-        <button id="logoutBtn">Logout</button>
+      #gameCanvas {
+        background: #70c5ce;
+        display: block;
+        border: 2px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="dropdown">
+        <button id="usernameDisplay" class="dropdown-toggle">Loading ▼</button>
+        <div class="dropdown-menu" id="userMenu">
+          <a href="stats.html">My Stats</a>
+          <button id="logoutBtn">Logout</button>
+        </div>
       </div>
-    </div>
-    <a href="index.html" class="logo-link" style="margin-right: 28px;">
-      <img src="images/logo.png" alt="Logo" />
-    </a>
-  </header>
+      <a href="index.html" class="logo-link" style="margin-right: 28px">
+        <img src="images/logo.png" alt="Logo" />
+      </a>
+    </header>
 
-  <div id="scoreDisplay">Score: 0</div>
-  <canvas id="gameCanvas" width="400" height="600" style="width: 400px; height: 600px;"></canvas>
+    <div id="scoreDisplay">Score: 0</div>
+    <canvas
+      id="gameCanvas"
+      width="400"
+      height="600"
+      style="width: 400px; height: 600px"
+    ></canvas>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+      import {
+        getAuth,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
-      authDomain: "wacky-wings.firebaseapp.com",
-      projectId: "wacky-wings",
-      storageBucket: "wacky-wings.appspot.com",
-      messagingSenderId: "86787566584",
-      appId: "1:86787566584:web:a4e421c1259763d061c40d"
-    };
+      const firebaseConfig = {
+        apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+        authDomain: "wacky-wings.firebaseapp.com",
+        projectId: "wacky-wings",
+        storageBucket: "wacky-wings.firebasestorage.app",
+        messagingSenderId: "86787566584",
+        appId: "1:86787566584:web:a4e421c1259763d061c48d",
+        measurementId: "G-WYSDC4Q441",
+      };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
 
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const userMenu = document.getElementById("userMenu");
-    const logoutBtn = document.getElementById("logoutBtn");
+      const usernameDisplay = document.getElementById("usernameDisplay");
+      const userMenu = document.getElementById("userMenu");
+      const logoutBtn = document.getElementById("logoutBtn");
 
-    usernameDisplay.addEventListener("click", () => {
-      const visible = userMenu.style.display === "block";
-      userMenu.style.display = visible ? "none" : "block";
-      usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, visible ? "▼" : "▲");
-    });
+      usernameDisplay.addEventListener("click", () => {
+        const visible = userMenu.style.display === "block";
+        userMenu.style.display = visible ? "none" : "block";
+        usernameDisplay.textContent = usernameDisplay.textContent.replace(
+          /.$/,
+          visible ? "▼" : "▲"
+        );
+      });
 
-    document.addEventListener("click", (e) => {
-      if (!usernameDisplay.contains(e.target) && !userMenu.contains(e.target)) {
-        userMenu.style.display = "none";
-        if (!usernameDisplay.textContent.endsWith("▼")) {
-          usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, "▼");
+      document.addEventListener("click", (e) => {
+        if (
+          !usernameDisplay.contains(e.target) &&
+          !userMenu.contains(e.target)
+        ) {
+          userMenu.style.display = "none";
+          if (!usernameDisplay.textContent.endsWith("▼")) {
+            usernameDisplay.textContent = usernameDisplay.textContent.replace(
+              /.$/,
+              "▼"
+            );
+          }
         }
-      }
-    });
+      });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const username = userDoc.exists()
+              ? userDoc.data().username
+              : "User";
+            usernameDisplay.textContent = `${username} ▼`;
+          } catch {
+            usernameDisplay.textContent = "User ▼";
+          }
+        } else {
+          usernameDisplay.textContent = "Guest ▼";
+        }
+      });
+
+      logoutBtn.addEventListener("click", async () => {
         try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          const username = userDoc.exists() ? userDoc.data().username : "User";
-          usernameDisplay.textContent = `${username} ▼`;
-        } catch {
-          usernameDisplay.textContent = "User ▼";
+          await signOut(auth);
+          window.location.href = "index.html";
+        } catch (err) {
+          console.error("Logout failed:", err);
         }
+      });
+    </script>
+
+    <script type="module">
+      const userAgent = navigator.userAgent || "";
+      const script = document.createElement("script");
+
+      if (/iPhone|iPad|iPod/.test(userAgent)) {
+        script.src = "game.ios.js";
+      } else if (/Android/.test(userAgent)) {
+        script.src = "game.android.js";
       } else {
-        usernameDisplay.textContent = "Guest ▼";
+        script.src = "game.desktop.js";
       }
-    });
 
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Logout failed:", err);
-      }
-    });
-  </script>
-
-  <script type="module">
-    const userAgent = navigator.userAgent || '';
-    const script = document.createElement('script');
-
-    if (/iPhone|iPad|iPod/.test(userAgent)) {
-      script.src = 'game.ios.js';
-    } else if (/Android/.test(userAgent)) {
-      script.src = 'game.android.js';
-    } else {
-      script.src = 'game.desktop.js';
-    }
-
-    script.type = 'module';
-    document.body.appendChild(script);
-  </script>
-
-</body>
+      script.type = "module";
+      document.body.appendChild(script);
+    </script>
+  </body>
 </html>
