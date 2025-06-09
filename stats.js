@@ -1,3 +1,4 @@
+console.log("🚀 stats.js is running");
 // === Import Firebase core app and Firestore ===
 import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
