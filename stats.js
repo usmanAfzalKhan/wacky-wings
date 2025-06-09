@@ -1,18 +1,21 @@
 // === Import Firebase core app and Firestore ===
-import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  initializeApp,
+  getApp,
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore,
   collection,
   getDocs,
   doc,
-  getDoc
+  getDoc,
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 // === Import Firebase Authentication ===
 import {
   getAuth,
   onAuthStateChanged,
-  signOut
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
 // === Firebase project configuration ===
@@ -23,7 +26,7 @@ const firebaseConfig = {
   storageBucket: "wacky-wings.firebasestorage.app",
   messagingSenderId: "86787566584",
   appId: "1:86787566584:web:a4e421c1259763d061c48d",
-  measurementId: "G-WYSDC4Q441"
+  measurementId: "G-WYSDC4Q441",
 };
 
 // === Initialize Firebase services ===
@@ -47,7 +50,10 @@ const leaderboardBody = document.getElementById("leaderboardBody");
 usernameDisplay.addEventListener("click", () => {
   const visible = userMenu.style.display === "block";
   userMenu.style.display = visible ? "none" : "block";
-  usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, visible ? "▼" : "▲");
+  usernameDisplay.textContent = usernameDisplay.textContent.replace(
+    /.$/,
+    visible ? "▼" : "▲"
+  );
 });
 
 // === Close dropdown when clicking outside of it ===
@@ -55,7 +61,10 @@ document.addEventListener("click", (e) => {
   if (!usernameDisplay.contains(e.target) && !userMenu.contains(e.target)) {
     userMenu.style.display = "none";
     if (!usernameDisplay.textContent.endsWith("▼")) {
-      usernameDisplay.textContent = usernameDisplay.textContent.replace(/.$/, "▼");
+      usernameDisplay.textContent = usernameDisplay.textContent.replace(
+        /.$/,
+        "▼"
+      );
     }
   }
 });
@@ -97,7 +106,7 @@ onAuthStateChanged(auth, async (user) => {
   try {
     const usersSnap = await getDocs(collection(db, "users"));
     const leaderboard = [];
-    usersSnap.forEach(doc => {
+    usersSnap.forEach((doc) => {
       const d = doc.data();
       if (d.username && typeof d.highscore === "number") {
         leaderboard.push({ username: d.username, highscore: d.highscore });
@@ -116,7 +125,13 @@ onAuthStateChanged(auth, async (user) => {
       `;
     });
   } catch (err) {
-    console.error("Failed to load leaderboard:", err);
-    leaderboardBody.innerHTML = "<tr><td colspan='3'>Error loading leaderboard</td></tr>";
+    console.error("Firestore Error Object:", err);
+    console.error("Error Details:", {
+      code: err.code,
+      message: err.message,
+      path: err.internalPath, // may be under a different property
+    });
+    leaderboardBody.innerHTML =
+      "<tr><td colspan='3'>Error loading leaderboard</td></tr>";
   }
 });
