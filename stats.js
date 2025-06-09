@@ -1,5 +1,5 @@
 // === Import Firebase core app and Firestore ===
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -17,27 +17,31 @@ import {
 
 // === Firebase project configuration ===
 const firebaseConfig = {
-  apiKey: "AIzaSyDJJ8FL79BXg4qA1XevOeD3Qqj_q87lN-o",
+  apiKey: "AIzaSyDJJ8FL79BXg4qA1Xev0eD3Qqj_q87lN-o",
   authDomain: "wacky-wings.firebaseapp.com",
   projectId: "wacky-wings",
-  storageBucket: "wacky-wings.appspot.com",
+  storageBucket: "wacky-wings.firebasestorage.app",
   messagingSenderId: "86787566584",
-  appId: "1:86787566584:web:a4e421c1259763d061c40d"
+  appId: "1:86787566584:web:a4e421c1259763d061c48d",
+  measurementId: "G-WYSDC4Q441"
 };
 
 // === Initialize Firebase services ===
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); // Firestore for database
-const auth = getAuth(app);    // Firebase Auth
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// === Optional: verify you’re pointing at the right project ===
+// console.log(getApp().options);
 
 // === DOM Elements ===
-const usernameDisplay = document.getElementById("usernameDisplay"); // Display username in navbar
-const userMenu = document.getElementById("userMenu");               // Dropdown menu
-const logoutBtn = document.getElementById("logoutBtn");             // Logout button
-const highScoreEl = document.getElementById("highScore");           // High score value
-const timesPlayedEl = document.getElementById("timesPlayed");       // Games played value
-const averageScoreEl = document.getElementById("averageScore");     // Average score value
-const leaderboardBody = document.getElementById("leaderboardBody"); // Leaderboard table body
+const usernameDisplay = document.getElementById("usernameDisplay");
+const userMenu = document.getElementById("userMenu");
+const logoutBtn = document.getElementById("logoutBtn");
+const highScoreEl = document.getElementById("highScore");
+const timesPlayedEl = document.getElementById("timesPlayed");
+const averageScoreEl = document.getElementById("averageScore");
+const leaderboardBody = document.getElementById("leaderboardBody");
 
 // === Handle dropdown toggle on username click ===
 usernameDisplay.addEventListener("click", () => {
@@ -59,8 +63,8 @@ document.addEventListener("click", (e) => {
 // === Logout logic ===
 logoutBtn.addEventListener("click", async () => {
   try {
-    await signOut(auth); // Sign out current user
-    window.location.href = "index.html"; // Redirect to login/home page
+    await signOut(auth);
+    window.location.href = "index.html";
   } catch (err) {
     console.error("Logout failed:", err);
   }
@@ -76,24 +80,15 @@ onAuthStateChanged(auth, async (user) => {
   try {
     // Fetch logged-in user's stats
     const userDoc = await getDoc(doc(db, "users", user.uid));
-
     if (!userDoc.exists()) {
-      usernameDisplay.textContent = "User ▼";
-      return;
+      usernameDisplay.textContent = "Player ▼";
+    } else {
+      const data = userDoc.data();
+      usernameDisplay.textContent = `${data.username || "Player"} ▼`;
+      highScoreEl.textContent = data.highscore || 0;
+      timesPlayedEl.textContent = data.timesPlayed || 0;
+      averageScoreEl.textContent = data.averageScore || 0;
     }
-
-    const userData = userDoc.data();
-    const username = userData.username || "Player";
-    const highscore = userData.highscore || 0;
-    const plays = userData.timesPlayed || 0;
-    const avg = userData.averageScore || 0;
-
-    // Display user stats in the DOM
-    usernameDisplay.textContent = `${username} ▼`;
-    highScoreEl.textContent = highscore;
-    timesPlayedEl.textContent = plays;
-    averageScoreEl.textContent = avg;
-
   } catch (err) {
     console.error("Error fetching user stats:", err);
   }
@@ -102,19 +97,14 @@ onAuthStateChanged(auth, async (user) => {
   try {
     const usersSnap = await getDocs(collection(db, "users"));
     const leaderboard = [];
-
-    // Extract each user's data into leaderboard array
     usersSnap.forEach(doc => {
-      const data = doc.data();
-      if (data.username && typeof data.highscore === "number") {
-        leaderboard.push({ username: data.username, highscore: data.highscore });
+      const d = doc.data();
+      if (d.username && typeof d.highscore === "number") {
+        leaderboard.push({ username: d.username, highscore: d.highscore });
       }
     });
 
-    // Sort leaderboard by score in descending order
     leaderboard.sort((a, b) => b.highscore - a.highscore);
-
-    // Clear current leaderboard and populate top 10
     leaderboardBody.innerHTML = "";
     leaderboard.slice(0, 10).forEach((entry, i) => {
       leaderboardBody.innerHTML += `
@@ -125,7 +115,6 @@ onAuthStateChanged(auth, async (user) => {
         </tr>
       `;
     });
-
   } catch (err) {
     console.error("Failed to load leaderboard:", err);
     leaderboardBody.innerHTML = "<tr><td colspan='3'>Error loading leaderboard</td></tr>";
